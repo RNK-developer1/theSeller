@@ -112,7 +112,7 @@
 						preg_match($cargo_arrive_template,$np_reply,$matches);
 						if(!empty($matches)) { $matches['activity']="Груз приехал на склад получателя (предоплата)"; $matches['msg']='Прибыл (предоплата)<br/>'.$matches['arrival_date']; $matches['status_step2'] = 205; $matches['status_step3'] = 311; $matches['from_status2'] = array(200,250,202,204); $matches['from_status3'] = array(301,302);} else {
 							preg_match($cargo_received_backshipment_template,$np_reply,$matches);
-							if(!empty($matches)) { $matches['activity']="Клиент отправил деньги"; $matches['msg']='Получен!<br/>'.$matches['received_date']; $matches['status_step2'] = 210; $matches['status_step3'] = 301; $matches['from_status2'] = array(200,250,202,204,206,208,209,220,221,222,224); $matches['from_status3'] = array();} else {
+							if(!empty($matches)) { $matches['activity']="Клиент отправил деньги"; $matches['msg']='Получен!<br/>'.$matches['received_date']; $matches['status_step2'] = 210; $matches['status_step3'] = 301; $matches['from_status2'] = array(200,250,202,204,206,207,208,209,220,221,222,223,224); $matches['from_status3'] = array();} else {
 								preg_match($cargo_received_template,$np_reply,$matches);
 								if(!empty($matches)) { $matches['activity']="Клиент получил груз (предоплата)"; $matches['msg']='Получен (предоплата)<br/>'.$matches['received_date']; $matches['status_step2'] = 209; $matches['status_step3'] = 311; $matches['from_status2'] = array(200,250,202,204,205,221,224); $matches['from_status3'] = array(301,302);} else {
 									preg_match($cargo_reject_return_template,$np_reply,$matches);

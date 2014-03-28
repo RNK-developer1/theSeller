@@ -191,7 +191,7 @@ array_push($out_table, (round(($out_table[9]/$out_table[3]), 4))*100 . '%');
 <?php include 'header.php' ?>
 <body>
 <?php include 'top_menu.php' ?>
-
+<a href="reports.php">&larr; Вернуться в меню отчетов</a>
 <h3 style="color: black;">Конверсия (<?php echo $selected_user ? $selected_user['username'] : 'все'; if ($_GET['order_date']) {?>, с <?php echo $dstart->format('d-m-y'); ?> по <?php echo $dend->format('d-m-y'); }?>)</h3>		
 <table class="table_center_50 table-bordered table_text report" border="1px">
     <tr>

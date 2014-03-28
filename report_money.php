@@ -196,6 +196,7 @@ function drawChart() {
 </script>
 
 <div class="container">	
+<a href="reports.php">&larr; Вернуться в меню отчетов</a>
 	<h3>День оплаты заказов</h3>
 	
 	<?php	$dstart = new DateTime($_GET['order_date']);

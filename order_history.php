@@ -67,7 +67,7 @@
 		$history = $stmt->fetchAll();
 		
 		foreach ($history as $fact) {
-			if ($fact['activity'] == 'Создана декларация Новой Почты') {
+			if ($fact['activity'] == 'Создана декларация Новой Почты' or $fact['activity'] == 'Создана декларация Новой Почты (ЛК)') {
 				$fact['comment'] = '<a target="_new" href="http://novaposhta.ua/frontend/tracking/ru?en='.$fact['details'].'">'.$fact['details'].'</a>';
 			}			
 		

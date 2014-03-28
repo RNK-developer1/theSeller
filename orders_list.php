@@ -109,6 +109,7 @@
 					statuses3.act as status_step3_act,
 					statuses3.domClass as status_step3_domClass,
 					COALESCE(statuses3.priority, statuses2.priority, statuses1.priority) as status_priority,
+					owner.id as owner_id,
 					owner.email as owner_email,
 					owner.username as owner_username,
 					owner.phone as owner_phone,
@@ -518,7 +519,7 @@
 		if (!$_GET['archive']) { ?>
 		<a href="newpost_list.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-success">Передать список подтвержденных заказов в Н.П</a>
 		<a href="newpost_preview.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-warning">Просмотр списка на печать</a>
-		<a href="newpost_print.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-default">Распечатать декларации</a>
+		<a href="newpost_lk_print.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-default">Распечатать декларации</a>
 		<a href="newpost_print_reset.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" class="btn btn-danger">Обнулить неотправленные декларации</a>
 		<?php if ($_SESSION['user']['group_id'] == 2) { ?>
 			<a href="money_list.php?r=1<?php if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} else {echo '&seller_id='.$_SESSION['user']['id'];} ?>" target="_new" class="btn btn-success">Получение денег</a>
@@ -789,7 +790,7 @@
 						</div>
 					</td>
 					<td <?php echo $ord['newpost_last_update'] ? 'title="обновлено:'.$ord['newpost_last_update'].'"': ''?>><a target="_new" href="http://novaposhta.ua/frontend/tracking/ru?en=<?php echo $ord['newpost_id'] ?>"><?php echo $ord['newpost_id'] ?></a><br/><?php echo ($np_answer['msg'] == '' ? ($ord['newpost_id'] ? '<i>обрабатывается</i>' : '') : $np_answer['msg']) ?>
-					<?php if($ord['newpost_api'] and $np_answer['msg'] == 'Оформлена декларация') { ?><br><a target="_blank" href="http://orders.novaposhta.ua/pformn.php?o=<?php echo $ord['newpost_id']."&num_copy=4&token=".$ord['newpost_api'];?>">распечатать</a><?php } ?>
+					<?php if($ord['newpost_api'] and $np_answer['msg'] == 'Оформлена декларация') { ?><br><a target="_blank" href="newpost_ttn.php?newpost_id=<?php echo $ord['newpost_id']."&id=".$ord['owner_id'];?>">распечатать</a><?php } ?>
 					</td>
 					<td <?php echo $ord['newpost_last_backorder_update'] ? 'title="обновлено:'.$ord['newpost_last_backorder_update'].'"': ''?>><a target="_new" href="http://novaposhta.ua/frontend/tracking/ru?en=<?php echo $ord['newpost_backorder'] ?>"><?php echo $ord['newpost_backorder'] ?></a><br/><?php echo ($npb_answer['msg'] == '' ? ($ord['newpost_backorder'] ? '<i>обрабатывается</i>' : '') : $npb_answer['msg']) ?></td>					
 				</tr>

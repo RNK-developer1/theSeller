@@ -89,6 +89,7 @@
 <body>
 <?php include 'top_menu.php' ?>
 <div class="container">
+<a href="reports.php">&larr; Вернуться в меню отчетов</a>
 	<?php 
 	if ($_GET['seller_id']) {?>
 		<h3>Отчет по оператору <?php if ($selected_user) {echo $selected_user['username'].' ';} if ($_GET['order_date']) {?>с <?php echo $dstart->format('d-m-y'); ?> по <?php echo $dend->format('d-m-y'); }?> </h3>

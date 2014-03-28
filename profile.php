@@ -105,16 +105,29 @@
 			<label>Телефон</label> <br/>
 			<input class="form-control"  type="text" name="phone" value="<?php echo $_SESSION['user']['phone'];?>" /> <br/>				
 	    </td>
+		</tr>
 		<?php if($_SESSION['user']['group_id'] == 2) { ?>
+		<tr>
 		<td>
 			<label>API ключ Новой Почты</label> <br/>
 			<input class="form-control" type="text" name="newpost_api" value="<?php echo $_SESSION['user']['newpost_api'];?>" /> <br/>				
-	    </td></tr><tr><td>
+	    </td>
+		<td>
+			<label>Карточка Новой Почты</label> <br/>
+			<input class="form-control" type="text" name="newpost_id" value="<?php echo $_SESSION['user']['newpost_id'];?>" /> <br/>				
+	    </td>
+		<td>
+			<label>Пароль Новой Почты</label> <br/>
+			<input class="form-control" type="text" name="newpost_psw" value="<?php echo $_SESSION['user']['newpost_psw'];?>" /> <br/>				
+	    </td>
+		</tr>
+		<tr><td>
 			<label>Alphaname(sms-fly)</label><br/>
 			<input class="form-control" type="text" name="alphaname" value="<?php echo $_SESSION['user']['alphaname'];?>" /> <br/>
 		<td/>
+		</tr>
 		<?php } ?>
-		</tr><?php if($_SESSION['user']['group_id'] == 2) { ?><tr><td>
+		<?php if($_SESSION['user']['group_id'] == 2) { ?><tr><td>
 			<label>Отделение Новой Почты для отправки грузов</label> <br/>
 			<select class="form-control city">												
 				<?php 

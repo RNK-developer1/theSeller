@@ -104,6 +104,7 @@
 <div style="display: none;">
 </div>
 <div class="container">	
+	<a href="reports.php">&larr; Вернуться в меню отчетов</a>
 	<h3>Возвраты оформлены, ещё не получены</h3>
 	<table cellpadding='2' border='1' style="table-layout: fixed; border-collapse: collapse; border: 1px solid black;">
 	<tr><th>Дата оформления<br/>Прошло дней</th><th>Дата и № заказа</th><th>Предприниматель</th><th>Статус шага 3</th></tr>

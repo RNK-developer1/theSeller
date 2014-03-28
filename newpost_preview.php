@@ -45,7 +45,8 @@
 				(orders.status_step1 = 110 OR orders.status_step1 = 112) AND
 				(:item_id IS NULL OR :item_id = '0' OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id)) AND
 				(orders.newpost_id = '' OR orders.newpost_id IS NULL) AND
-				owner.newpost_api IS NOT NULL AND
+				owner.newpost_id IS NOT NULL AND
+				owner.newpost_psw IS NOT NULL AND
 				orders.whs_ref IS NOT NULL" :
 		"   FROM orders LEFT OUTER JOIN warehouses ON warehouses.ref = orders.whs_ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id, users as owner, operators_for_sellers
 			WHERE
@@ -58,7 +59,8 @@
 				(orders.status_step1 = 110 OR orders.status_step1 = 112) AND
 				(orders.newpost_id = '' OR orders.newpost_id IS NULL) AND
 				owner.id = orders.owner_id AND
-				owner.newpost_api IS NOT NULL AND
+				owner.newpost_id IS NOT NULL AND
+				owner.newpost_psw IS NOT NULL AND
 				orders.whs_ref IS NOT NULL AND
 				(:seller_id IS NULL OR :seller_id = '0' OR owner.id = :seller_id) AND
 				(:item_id IS NULL OR :item_id = '0' OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id))".(

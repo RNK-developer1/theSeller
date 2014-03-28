@@ -92,7 +92,7 @@
                                 max(oa1.date) print_date,
                                 oa1.`user_id` printed_user_id
                                 from orders_audit oa1
-                                where oa1.activity IN ('Создана декларация Новой Почты', 'Передан в списке заказов в Новую Почту')
+                                where oa1.activity IN ('Создана декларация Новой Почты (ЛК)', 'Создана декларация Новой Почты', 'Передан в списке заказов в Новую Почту')
                                 group by oa1.order_id)				as a1 on (a1.order_id = o.id)
                                 left join users as u_pr on (u_pr.`id` = a1.printed_user_id)
                                 inner join (select

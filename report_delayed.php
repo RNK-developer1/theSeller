@@ -116,6 +116,7 @@
 <div style="display: none;">
 </div>
 <div class="container">	
+<a href="reports.php">&larr; Вернуться в меню отчетов</a>
 	<h3>Хвосты операторов</h3>
 	
 	<?php $t_oper = ''; 

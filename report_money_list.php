@@ -105,6 +105,7 @@
 ?>
 
 <div class="container">	
+<a href="reports.php">&larr; Вернуться в меню отчетов</a>
 	<h3>День оплаты заказов: <?php echo $_GET['d'] ?></h3>
 	
 	<?php	$dstart = new DateTime($_GET['order_date']);

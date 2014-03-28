@@ -345,4 +345,124 @@ echo $myXML;
 		}
 	}
 */?>	
-	</table>
+	</table>
+<?php
+	$query = " 
+		SELECT 		
+			owner.id as owner_id,
+			owner.username as username,
+			owner.phone as user_phone,
+			owner.alphaname as alphaname,
+			orders.id as id,
+			COALESCE(item.short_name, 'товар') as item,
+			orders.item_id as item_id,
+			orders.item_price as item_price,
+			orders.item_params as item_params,
+			orders.item_count as item_count,
+			orders.city_area as city_area,
+			orders.address as address,
+			orders.courier_adr as courier_adr,
+			orders.fio as fio,
+			orders.phone as phone,
+			orders.email as email,
+			orders.newpost_id as newpost_id,
+			orders.newpost_answer as newpost_answer,
+			orders.status_step2 as status_step2
+		   FROM orders LEFT OUTER JOIN item ON orders.item_id = item.uuid, users as owner
+			WHERE
+				HOUR(NOW()) >= 9 AND
+				HOUR(NOW()) <= 16 AND
+				orders.status_step1 > 50 AND
+				orders.status_step2 IN (207, 223) AND
+				orders.status_step3 = 0 AND
+				orders.owner_id = owner.id AND
+				(:owner IS NULL OR owner.id = :owner)
+		";		
+	$query_params = array( ':owner' => $_GET['owner'] ); 
+	
+	try{ 
+		$stmt = $db->prepare($query); 
+		$result = $stmt->execute($query_params); 
+	} 
+	catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
+	$orders = $stmt->fetchAll();
+	
+	foreach ($orders as $ord) {
+		$query_sms = "SELECT 
+			date,
+			status
+		FROM flysms WHERE type = 2 AND order_id = :order_id AND status = 'DELIVERED'";
+		$query_params = array(':order_id' => $ord['id']);
+
+		try{ 
+			$stmt = $db->prepare($query_sms); 
+			$result = $stmt->execute($query_params); 
+		} 
+		catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
+		
+		$delivered = $stmt->fetch(); 			
+	
+		if (!$delivered) {
+			$query_sms = "SELECT 
+				date,
+				status
+			FROM flysms WHERE type=2 AND order_id = :order_id AND HOUR(TIMEDIFF(NOW(), date)) < 24";
+			$query_params = array(':order_id' => $ord['id']);
+
+			try{ 
+				$stmt = $db->prepare($query_sms); 
+				$result = $stmt->execute($query_params); 
+			} 
+			catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
+			
+			$this_day_sent = $stmt->fetch();
+		
+			if (!$this_day_sent) {
+				$short_item = explode(' ',$ord['item']);
+				$sms_text = 'Успей забрать '.($ord['status_step2']==223 ? 'сегодня ':'').$ord['item'].' Накл.'.$ord['newpost_id']; 
+				echo $ord['phone'].'<br>';
+				echo $ord['id'].'<br>';
+				echo $sms_text.'<br>';
+				
+				if ($_GET['view']) { 						
+					continue; 
+				}
+						
+				send_sms($sms_text,"38".str_replace(array('(',')','-'), "", $ord['phone']),$ord['id'],(($ord['alphaname'] and $ord['alphaname'] != '') ? $ord['alphaname'] : null),2);					
+				
+				$query = "INSERT INTO debug (msg) VALUES (:msg)";			
+				
+				$query_params = array( 
+					':msg' => $ord['phone'].': '.$sms_text
+				); 
+				
+				try{ 
+					$stmt = $db->prepare($query); 
+					$result = $stmt->execute($query_params); 
+				} 
+				catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 		
+
+		
+				$query = "INSERT INTO orders_audit(date, order_id, user_id, activity, details) VALUES
+							(	NOW(),
+								:order_id,
+								:user_id,
+								:activity,
+								:details		)";
+				
+				$query_params = array( 
+					':details' => $sms_text,
+					':activity' => 'Отслеживание доставки: отправлено SMS',
+					':user_id' => 1,
+					':order_id' => $ord['id']
+				); 
+				
+				try{ 
+					$stmt = $db->prepare($query); 
+					$result = $stmt->execute($query_params); 
+				} 
+				catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); }
+			}
+		}
+	}
+?>
