@@ -354,7 +354,7 @@ echo $myXML;
 			owner.phone as user_phone,
 			owner.alphaname as alphaname,
 			orders.id as id,
-			COALESCE(item.short_name, 'товар') as item,
+			COALESCE(item.short_name, 'заказ') as item,
 			orders.item_id as item_id,
 			orders.item_price as item_price,
 			orders.item_params as item_params,
