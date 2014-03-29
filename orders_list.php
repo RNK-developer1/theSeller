@@ -12,7 +12,8 @@
 					SELECT 
 						COUNT(distinct orders.id) as cnt "					
 				.($_SESSION['user']['group_id'] == 2 ? 
-				"   FROM users as owner, orders left join orders_audit on orders.id = orders_audit.order_id  
+				"   FROM users as owner, orders 
+						LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
 					WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
 							 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
 							 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
@@ -26,9 +27,10 @@
 						owner.id = orders.owner_id AND
 						(:seller_id = '0' OR owner.id = :seller_id) AND
 						owner.id IN (SELECT subseller_id FROM sellers_for_sellers WHERE sellers_for_sellers.seller_id = :user_id)" . (
-						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND (select max(orders_audit.date) from orders_audit where orders_audit.order_id = orders.id) <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") 
+						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") 
 						:
-				"   FROM users as owner, operators_for_sellers, orders left join orders_audit on orders.id = orders_audit.order_id  
+				"   FROM users as owner, operators_for_sellers, orders  
+						LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
 					WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
 							 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
 							 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
@@ -44,7 +46,7 @@
 						(:seller_id IS NULL OR :seller_id = '0' OR owner.id = :seller_id) AND
 						(:item_id IS NULL OR :item_id = '0' OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id))".(
 						($_GET['oper'] and $_GET['oper']=='2') ? " AND oper_id IS NULL" : (($_GET['oper'] and $_GET['oper']=='1') ? " AND oper_id = :user_id" : "")) . (
-						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND (select max(orders_audit.date) from orders_audit where orders_audit.order_id = orders.id) <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "")
+						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "")
 				);		
 			$query_params =  
 				array( 
@@ -120,7 +122,8 @@
 					editor.username as editor_username,
 					TIMESTAMPDIFF(MINUTE, orders.inwork_time, NOW()) as editor_time"					
 			.($_SESSION['user']['group_id'] == 2 ? 
-			"   FROM statuses as statuses1, statuses as statuses2, statuses as statuses3, users as owner, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid left join orders_audit on orders.id = orders_audit.order_id  
+			"   FROM statuses as statuses1, statuses as statuses2, statuses as statuses3, users as owner, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
+					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
 				WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
 						 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
 						 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
@@ -137,9 +140,10 @@
 					owner.id = orders.owner_id AND
 					(:seller_id = '0' OR owner.id = :seller_id) AND
 					owner.id IN (SELECT subseller_id FROM sellers_for_sellers WHERE sellers_for_sellers.seller_id = :user_id)" . (
-					($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND (select max(orders_audit.date) from orders_audit where orders_audit.order_id = orders.id) <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") . " 
+					($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") . " 
 					GROUP BY orders.id ORDER BY " :
-			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid left join orders_audit on orders.id = orders_audit.order_id  
+			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
+					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
 				WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
 						 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
 						 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
@@ -158,7 +162,7 @@
 					(:seller_id IS NULL OR :seller_id = '0' OR owner.id = :seller_id) AND
 					(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id))".(
 					($_GET['oper'] and $_GET['oper']=='2') ? " AND oper_id IS NULL" : (($_GET['oper'] and $_GET['oper']=='1') ? " AND oper_id = :user_id" : "")) . (
-						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND (select max(orders_audit.date) from orders_audit where orders_audit.order_id = orders.id) <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") .
+						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") .
 					"GROUP BY orders.id ORDER BY editor_ord DESC,"					
 			)." alert DESC, status_priority DESC, created_at ".($_GET['archive'] ? 'DESC':'ASC')." LIMIT ".$page_start.",500";	
 
