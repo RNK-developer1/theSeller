@@ -39,6 +39,7 @@
 				users.id = owner_id AND
 				(:owner_id = '0' OR owner_id = :owner_id) AND
 				owner_id IN (SELECT subseller_id FROM sellers_for_sellers WHERE sellers_for_sellers.seller_id = :user_id)
+			ORDER BY inactive
         "; 
 	$query_params = array( 
 		':user_id' => $_SESSION['user']['id'],
@@ -134,7 +135,9 @@
 	<thead class="header"><th>Код товара</th><th>Название</th><th>Цена</th><th>Письмо покупателю</th><th>Письмо с декларацией</th><th></th><th>Действие</th></thead>
 	<?php	foreach ($requests as $row){ ?>
 				<tr id="item_<?php echo $row['uuid']?>">
-				<td><?php echo $row['uuid']; if ($_GET['seller_id'] == '0') {echo '<br/><small>'.$row['username'].'</small>';} ?></td>
+				<td><?php echo $row['uuid']; if ($_GET['seller_id'] == '0') {echo '<br/><small>'.$row['username'].'</small><br/>';} ?>
+					<a href="item_toggle_active.php?id=<?php echo $row['uuid'];?>&<?php echo $row['inactive'] ? '' : 'inactive=inactive'?>" class="btn btn-<?php echo $row['inactive'] ? 'danger' : 'success'?>"><?php echo $row['inactive'] ? 'Неактивный' : 'Активный'?></a>
+				</td>
 				<td><?php if ( $row['url'] ) { echo "<a target=\"_blank\" href=\"".$row['url']."\">".$row['name']."</a>"; } else { echo $row['name']; } ?></td>
 				<td><?php echo number_format($row['price'],2) ?><br/>min: <?php echo $row['price_min'] ? number_format($row['price_min'],2) : 'н/д';?></td>
 				<td>					
