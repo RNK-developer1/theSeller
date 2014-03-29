@@ -1181,7 +1181,7 @@ if (!$_GET['item_id']) {
 	for ($hr=0; $hr < 24; $hr++) { echo '<th  style="width: 30px;">'.$hr.'</th>';}}
 	if($report_type == 2){
 	echo "<tr><th style='width: 70px;'>День</th>";
-	echo '<th  style="width: 30px;">Пн</th><th  style="width: 30px;">Вт</th><th  style="width: 30px;">Ср</th><th  style="width: 30px;">Чт</th><th  style="width: 30px;">Пн</th><th  style="width: 30px;">Сб</th><th  style="width: 30px;">Вс</th>';
+	echo '<th  style="width: 30px;">Пн</th><th  style="width: 30px;">Вт</th><th  style="width: 30px;">Ср</th><th  style="width: 30px;">Чт</th><th  style="width: 30px;">Пт</th><th  style="width: 30px;">Сб</th><th  style="width: 30px;">Вс</th>';
 	echo "<th>Всего</th></tr><th></th>".$table_day."<td><strong>".$orders_count_sum."</strong></td></table>";
 	}
 	if($report_type == 3){
