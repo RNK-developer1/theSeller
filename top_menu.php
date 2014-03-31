@@ -110,9 +110,11 @@
 								<div class="form-group">	
 									<?php if (($_GET['filter'] AND $_GET['filter'] == '1') OR ($_GET['count_days'] OR $_GET['count_days'] == '0')) { ?>
 										<select name="count_days" class="form-control" id="item_id" style="max-width: 180px" onchange="$(this).closest('form').trigger('submit');">
-											<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
+		<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
+									<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
 											<option value='2' <?php echo ($_GET['count_days'] == '2') ? 'selected=selected' : ''?>>Застывшие (более 2 дней) заказы</option>";
-										</select>
+											<option value='3' <?php echo ($_GET['count_days'] == '3') ? 'selected=selected' : ''?>>Отправлены 3 дня назад</option>";
+											<option value='7' <?php echo ($_GET['count_days'] == '7') ? 'selected=selected' : ''?>>Отправлены 7 дней назад</option>";										</select>
 									<?php } ?>
 								</div>								
 								<a class="btn btn-default" href="javascript:window.location.reload();">Обновить</a>
