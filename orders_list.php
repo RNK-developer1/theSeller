@@ -4,73 +4,12 @@
 	if (empty($_SESSION['user']) || $_SESSION['user']['active'] == 0) {
 		header("Location: index.php"); 
 		die("Перенаправление: index.php"); 
-	}
-	
-	$page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
-	
-		$query = " 
-					SELECT 
-						COUNT(distinct orders.id) as cnt "					
-				.($_SESSION['user']['group_id'] == 2 ? 
-				"   FROM users as owner, orders 
-						LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
-					WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
-							 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
-							 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
-							"(orders.status_step1 = 0 OR orders.status_step1 > 50) AND
-							 (orders.status_step2 = 0 OR orders.status_step2 > 50) AND
-							 (orders.status_step3 = 0 OR orders.status_step3 > 50) AND")."
-						(:status_id IS NULL OR :status_id = '0' OR orders.status_step1 = :status_id OR orders.status_step2 = :status_id OR orders.status_step3 = :status_id) AND
-						(:order_date IS NULL OR :order_date = '' OR DATE(orders.created_at) >= :order_date) AND
-						(:order_date_end IS NULL OR :order_date_end = '' OR DATE(orders.created_at) <= :order_date_end) AND
-						(:item_id IS NULL OR :item_id = '0' OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id)) AND
-						owner.id = orders.owner_id AND
-						(:seller_id = '0' OR owner.id = :seller_id) AND
-						owner.id IN (SELECT subseller_id FROM sellers_for_sellers WHERE sellers_for_sellers.seller_id = :user_id)" . (
-						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") 
-						:
-				"   FROM users as owner, operators_for_sellers, orders  
-						LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
-					WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
-							 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
-							 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
-							"(orders.status_step1 = 0 OR orders.status_step1 > 50) AND
-							 (orders.status_step2 = 0 OR orders.status_step2 > 50) AND
-							 (orders.status_step3 = 0 OR orders.status_step3 > 50) AND")."						
-						(:status_id IS NULL OR :status_id = '0' OR orders.status_step1 = :status_id OR orders.status_step2 = :status_id OR orders.status_step3 = :status_id) AND
-						(:order_date IS NULL OR :order_date = '' OR DATE(orders.created_at) >= :order_date) AND
-						(:order_date_end IS NULL OR :order_date_end = '' OR DATE(orders.created_at) <= :order_date_end) AND
-						owner.id = orders.owner_id AND				
-						orders.owner_id = operators_for_sellers.seller_id AND
-						operators_for_sellers.operator_id = :user_id AND
-						(:seller_id IS NULL OR :seller_id = '0' OR owner.id = :seller_id) AND
-						(:item_id IS NULL OR :item_id = '0' OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id))".(
-						($_GET['oper'] and $_GET['oper']=='2') ? " AND oper_id IS NULL" : (($_GET['oper'] and $_GET['oper']=='1') ? " AND oper_id = :user_id" : "")) . (
-						($_GET['count_days'] and $_GET['count_days'] > 0) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "")
-				);		
-			$query_params =  
-				array( 
-					':user_id' => $_SESSION['user']['id'],
-					':seller_id' => (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']),
-					':item_id' => $_GET['item_id'],
-					':status_id' => $_GET['status_id'],
-					':order_date' => $_GET['order_date'],
-					':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date'],
-				); 
-		 
-		try{ 
-			$stmt = $db->prepare($query); 
-			$result = $stmt->execute($query_params); 
-		} 
-		catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
-		
-		$orders_full_count = $stmt->fetch(); 
-		
+	}		
 	
 		$page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
 	
 		$query = " 
-				SELECT 
+				SELECT SQL_CALC_FOUND_ROWS
 					COALESCE((orders.alert_at <= NOW()),0) as 'alert',
 					orders.id as id,
 					orders.created_at as created_at,
@@ -183,6 +122,17 @@
 	catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
 	
 	$orders = $stmt->fetchAll();
+
+	$query = "SELECT FOUND_ROWS() as `cnt`";
+
+	try{ 
+		$stmt = $db->prepare($query);
+		$result = $stmt->execute(); 
+	} 
+	catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
+	
+	$orders_full_count = $stmt->fetch();
+
 		
 	if ($_SESSION['user']['group_id'] == 2) {
 		$select_sellers = array();
