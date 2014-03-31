@@ -81,7 +81,7 @@
 					(:seller_id = '0' OR owner.id = :seller_id) AND
 					owner.id IN (SELECT subseller_id FROM sellers_for_sellers WHERE sellers_for_sellers.seller_id = :user_id)" . (
 					($_GET['count_days'] and $_GET['count_days'] == 2) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") . ( 
-					($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  TIMESTAMPDIFF(DAY, send_times.send_time, DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)) = 0" : "") . " 
+					($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") . "
 					GROUP BY orders.id ORDER BY " :
 			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
 					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
@@ -105,7 +105,7 @@
 					(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id))".(
 					($_GET['oper'] and $_GET['oper']=='2') ? " AND oper_id IS NULL" : (($_GET['oper'] and $_GET['oper']=='1') ? " AND oper_id = :user_id" : "")) . (
 						($_GET['count_days'] and $_GET['count_days'] == 2) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") . (
-						($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND TIMESTAMPDIFF(DAY, send_times.send_time, DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)) = 0" : "") . " 
+						($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY)" : "") . " 
 					GROUP BY orders.id ORDER BY editor_ord DESC,"					
 			)." alert DESC, status_priority DESC, created_at ".($_GET['archive'] ? 'DESC':'ASC')." LIMIT ".$page_start.",500";	
 

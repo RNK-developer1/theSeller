@@ -113,8 +113,8 @@
 		<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
 									<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
 											<option value='2' <?php echo ($_GET['count_days'] == '2') ? 'selected=selected' : ''?>>Застывшие (более 2 дней) заказы</option>";
-											<option value='3' <?php echo ($_GET['count_days'] == '3') ? 'selected=selected' : ''?>>Отправлены 3 дня назад</option>";
-											<option value='7' <?php echo ($_GET['count_days'] == '7') ? 'selected=selected' : ''?>>Отправлены 7 дней назад</option>";										</select>
+											<option value='3' <?php echo ($_GET['count_days'] == '3') ? 'selected=selected' : ''?>>Отправлены более 3 дней назад</option>";
+											<option value='7' <?php echo ($_GET['count_days'] == '7') ? 'selected=selected' : ''?>>Отправлены более 7 дней назад</option>";										</select>
 									<?php } ?>
 								</div>								
 								<a class="btn btn-default" href="javascript:window.location.reload();">Обновить</a>
