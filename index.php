@@ -82,13 +82,13 @@
 		<p><a href='reg_list.php' class='btn btn-default'>Подчиненные</a></p>
 		<p><a href='items_list.php' class='btn btn-default'>Справочник товаров</a></p>
 		<p><a href='reports.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчеты</a></p>		
-		<p><a href='orders_list.php?filter=1' class='btn btn-default'>Текущие заказы</a></p>
-		<p><a href='orders_list.php?archive=1&?filter=1' class='btn btn-default'>Архив заказов</a></p>
+		<p><a href='orders_list.php' class='btn btn-default'>Текущие заказы</a></p>
+		<p><a href='orders_list.php?archive=1' class='btn btn-default'>Архив заказов</a></p>
 		<p><a href='preorders_list.php' class='btn btn-default'>Посещения</a></p>
 	<?php } else if ($_SESSION['user']['group_id'] == 1) { ?> 
 		<p><a href='profile.php' class='btn btn-default'>Профиль пользоваетеля</a></p>
-		<p><a href='orders_list.php?seller_id=0&oper=1&filter=1' class='btn btn-default'>Текущие заказы</a></p>
-		<p><a href='orders_list.php?seller_id=0&archive=1&?filter=1' class='btn btn-default'>Архив заказов</a></p>
+		<p><a href='orders_list.php?seller_id=0&oper=1' class='btn btn-default'>Текущие заказы</a></p>
+		<p><a href='orders_list.php?seller_id=0&archive=1' class='btn btn-default'>Архив заказов</a></p>
 		<p><a href='preorders_list.php?seller_id=0' class='btn btn-default'>Посещения</a></p>
 	<?php } ?>
 </div>

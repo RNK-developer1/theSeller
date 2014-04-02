@@ -1,3 +1,12 @@
+<?php
+	$url = $_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]; 
+	$url_array = (parse_url($url));
+	$path_parts = pathinfo($url_array['path']);
+	$php_script_name = $path_parts['basename'];
+	$filter_orders = array(
+		'orders_list.php',
+	);
+?>
 <div class="navbar navbar-fixed-top">
   <div class="container">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
@@ -17,13 +26,13 @@
 						<p><a href='reg_list.php' class='btn btn-default'>Подчиненные</a></p>
 						<p><a href='items_list.php' class='btn btn-default'>Справочник товаров</a></p>		
 						<p><a href='reports.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчеты</a></p>								
-						<p><a href='orders_list.php?filter=1' class='btn btn-default'>Текущие заказы</a></p>
-						<p><a href='orders_list.php?archive=1&filter=1' class='btn btn-default'>Архив заказов</a></p>
+						<p><a href='orders_list.php' class='btn btn-default'>Текущие заказы</a></p>
+						<p><a href='orders_list.php?archive=1' class='btn btn-default'>Архив заказов</a></p>
 						<p><a href='preorders_list.php' class='btn btn-default'>Посещения</a></p>
 					<?php } else if (!empty($_SESSION['user']) and $_SESSION['user']['group_id'] == 1) { ?> 
 						<p><a href='profile.php' class='btn btn-default'>Профиль пользователя</a></p>
-						<p><a href='orders_list.php?seller_id=0&oper=1&filter=1' class='btn btn-default'>Текущие заказы</a></p>
-						<p><a href='orders_list.php?seller_id=0&archive=1&filter=1' class='btn btn-default'>Архив заказов</a></p>
+						<p><a href='orders_list.php?seller_id=0&oper=1' class='btn btn-default'>Текущие заказы</a></p>
+						<p><a href='orders_list.php?seller_id=0&archive=1' class='btn btn-default'>Архив заказов</a></p>
 						<p><a href='preorders_list.php?seller_id=0' class='btn btn-default'>Посещения</a></p>
 					<?php } ?>
 				</ul>
@@ -108,10 +117,9 @@
 									<?php } ?>
 								</div>
 								<div class="form-group">	
-									<?php if (($_GET['filter'] AND $_GET['filter'] == '1') OR ($_GET['count_days'] OR $_GET['count_days'] == '0')) { ?>
+									<?php if (in_array($php_script_name, $filter_orders)) { ?>
 										<select name="count_days" class="form-control" id="item_id" style="max-width: 180px" onchange="$(this).closest('form').trigger('submit');">
-		<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
-									<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
+											<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
 											<option value='2' <?php echo ($_GET['count_days'] == '2') ? 'selected=selected' : ''?>>Застывшие (более 2 дней) заказы</option>";
 											<option value='3' <?php echo ($_GET['count_days'] == '3') ? 'selected=selected' : ''?>>Отправлены более 3 дней назад</option>";
 											<option value='7' <?php echo ($_GET['count_days'] == '7') ? 'selected=selected' : ''?>>Отправлены более 7 дней назад</option>";										</select>
@@ -189,7 +197,7 @@
 					</ul>
 				</div>
 			<?php } ?>
-			<?php if ($statuses_step1) { ?>
+			<?php if (in_array($php_script_name, $filter_orders)) { ?>			
 				<div class="nav-collapse collapse">
 					<ul class="nav navbar-nav pull-right">
 						<li class="dropdown">
