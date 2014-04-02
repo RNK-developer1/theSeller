@@ -15,8 +15,33 @@
 
 		return $str_temp;
 	}
-		$page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
-	
+
+	$page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
+		
+	$fio = array();
+	$fio_search = "";
+	if ($_GET['search_key'] and $_GET['search_key'] == 3 and $_GET['search_text'] and !empty($_GET['search_text'])) {
+		$fio = explode(' ', $_GET['search_text']);
+		foreach ($fio as $key=>$value) {
+			if (empty($value)) unset($fio[$key]);				
+		}
+		sort($fio);
+		switch (count($fio)) {
+			case 1: 
+				$fio_search = " AND orders.fio LIKE '%" . $fio[0] . "%' ";
+				break;
+			case 2:
+				$fio_search = " AND (orders.fio LIKE '%" . $fio[0] . "%' AND orders.fio LIKE '%" . $fio[1] . "%') ";
+				break;
+			case 3:
+				$fio_search = " AND (orders.fio LIKE '%" . $fio[0] . "%' AND orders.fio LIKE '%" . $fio[1] . "%' AND orders.fio LIKE '%" . $fio[2] . "%') ";
+				break;
+			default:
+				break;
+		}
+	}
+
+
 		$query = " 
 				SELECT SQL_CALC_FOUND_ROWS
 					COALESCE((orders.alert_at <= NOW()),0) as 'alert',
@@ -93,8 +118,8 @@
 					($_GET['count_days'] and $_GET['count_days'] == 2) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . ( 
 					($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
 					($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = '" . strip_phone($_GET['search_text']) . "' " : "") . ( 
-					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND orders.newpost_id = '" . $_GET['search_text'] . "' " : "") . (
-					($_GET['search_key'] and $_GET['search_key'] == 3 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND orders.fio = '" . $_GET['search_text'] . "' " : "") . "
+					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND (orders.newpost_id = '" . $_GET['search_text'] . "' OR orders.newpost_backorder = '" . $_GET['search_text'] . "') " : "") . 
+					$fio_search . "
 					GROUP BY orders.id ORDER BY " :
 			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
 					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id " . (
@@ -119,10 +144,10 @@
 					(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id))".(
 					($_GET['oper'] and $_GET['oper']=='2') ? " AND oper_id IS NULL" : (($_GET['oper'] and $_GET['oper']=='1') ? " AND oper_id = :user_id" : "")) . (
 					($_GET['count_days'] and $_GET['count_days'] == 2) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . ( 
-					($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
-					($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = " . strip_phone($_GET['search_text']) . " " : "") . ( 
-					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND orders.newpost_id = " . $_GET['search_text'] . " " : "") . (
-					($_GET['search_key'] and $_GET['search_key'] == 3 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND oredrs.fio = " . $_GET['search_text'] . " " : "") . "
+					($_GET['count_days'] and $_GET['count_days'] > 2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
+					($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = '" . strip_phone($_GET['search_text']) . "' " : "") . ( 
+					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND (orders.newpost_id = '" . $_GET['search_text'] . "' OR orders.newpost_backorder = '" . $_GET['search_text'] . "') " : "") . 
+					$fio_search . "
 					GROUP BY orders.id ORDER BY editor_ord DESC,"					
 			)." alert DESC, status_priority DESC, created_at ".($_GET['archive'] ? 'DESC':'ASC')." LIMIT ".$page_start.",500";	
 

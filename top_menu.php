@@ -193,9 +193,9 @@
 				<div class="nav-collapse collapse">
 					<ul class="nav navbar-nav pull-right">
 						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php if (($_GET['search_key'] and $_GET['search_key'] != '0') or $_GET['search_text']) {echo '<b style="color:red;">Поиск</b>';} else {echo "Поиск";} ?><b class="caret"></b></a>
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php if (($_GET['search_key'] and $_GET['search_key'] != '0')) {echo '<b style="color:red;">Поиск</b>';} else {echo "Поиск";} ?><b class="caret"></b></a>
 							<ul class="dropdown-menu" style="padding: 20px">
-							<form role="form">
+							<form id= "search_form" role="form">
 									<?php if ($_GET['type']) { ?>
 										<input type='hidden' name='type' value='<?php echo $_GET['type']?>'>
 									<?php } ?>
@@ -210,17 +210,17 @@
 									<?php } ?>								
 									<div class="form-group">
 										<label for="search_text">Текст для поиска:</label>
-										<input type='text' class="form-control" name='search_text' value='<?php echo ($_GET['search_text']) ? $_GET['search_text'] : 'Введите текст...' ?>' 
-											 onfocus="if(this.value == 'Введите текст...') this.value = ''" onblur="this.value = if(!this.value || this.value.lehgth === 0) 'Введите текст...'" />
+										<input id="search_text" type='text' class="form-control" name="search_text" placeholder="Введите текст..." value='<?php echo ($_GET['search_text'] && ($_GET['search_key'] && $_GET['search_key'] > '0')) ? $_GET['search_text'] : '' ?>' />
 										<label for="search_key">Ключ поиска:</label>									
-										<select name="search_key" class="form-control" id="search_key" style="width:200px">
-											<option value='0' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '0') ? 'selected=selected' : ''?>>Выберите поисковый ключ</option>
-											<option value ='1' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '1') ? 'selected=selected' : ''?>>Телефон</option>
-											<option value ='2' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '2') ? 'selected=selected' : ''?>>Номер декларации</option>
-											<option value ='3' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '3') ? 'selected=selected' : ''?>>ФИО покупателя</option>
+										<select id="search_key" name="search_key" class="form-control" id="search_key" style="width:200px">
+											<option value ='0' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '0') ? 'selected=selected' : ''?>></option>
+											<option value ='1' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '1') ? 'selected=selected' : ''?>>Телефон</option>
+											<option value ='2' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '2') ? 'selected=selected' : ''?>>Номер декларации</option>
+											<option value ='3' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '3') ? 'selected=selected' : ''?>>ФИО покупателя</option>
 										</select>									
 									</div>					  
 								  <button type="submit" class="btn btn-default">Показать</button>
+								  <button id="search_reset" type="reset" value="Reset" class="btn btn-default" >Сбросить</button>
 								</form>
 							</ul>
 						</li>
@@ -242,4 +242,21 @@
 		language: 'ru',
 		weekStart: 1
 	  });
+	$(document).ready(function(){
+		$('#search_reset').click(function() {
+
+			$('#search_key option').each(function() {
+    			if($(this).is(':selected'))
+    				$(this).removeAttr('selected');
+			});
+			$('#search_key option').each(function() {
+    			if($(this).val() == '0')
+    				$(this).attr("selected","selected");
+			});
+
+			$('#search_text input').val('');
+			$('#search_text input').text('Введите текст...');
+			$('#search_form').submit();;
+   		});
+	});
 </script>
