@@ -188,7 +188,46 @@
 						</li>
 					</ul>
 				</div>
-			<?php } ?>			
+			<?php } ?>
+			<?php if ($statuses_step1) { ?>
+				<div class="nav-collapse collapse">
+					<ul class="nav navbar-nav pull-right">
+						<li class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php if (($_GET['search_key'] and $_GET['search_key'] != '0') or $_GET['search_text']) {echo '<b style="color:red;">Поиск</b>';} else {echo "Поиск";} ?><b class="caret"></b></a>
+							<ul class="dropdown-menu" style="padding: 20px">
+							<form role="form">
+									<?php if ($_GET['type']) { ?>
+										<input type='hidden' name='type' value='<?php echo $_GET['type']?>'>
+									<?php } ?>
+									<?php if ($_GET['archive']) { ?>
+										<input type='hidden' name='archive' value='1'>
+									<?php } ?>
+									<?php if ($_GET['seller_id'] or $_GET['seller_id']=='0') { ?>
+										<input type='hidden' name='seller_id' value='<?php echo $_GET['seller_id']?>'>
+									<?php } ?>
+									<?php if ($_GET['item_id']) { ?>
+										<input type='hidden' name='item_id' value='<?php echo $_GET['item_id'] ?>'>
+									<?php } ?>								
+									<div class="form-group">
+										<label for="search_text">Текст для поиска:</label>
+										<input type='text' class="form-control" name='search_text' value='<?php echo ($_GET['search_text']) ? $_GET['search_text'] : 'Введите текст...' ?>' 
+											 onfocus="if(this.value == 'Введите текст...') this.value = ''" onblur="this.value = if(!this.value || this.value.lehgth === 0) 'Введите текст...'" />
+										<label for="search_key">Ключ поиска:</label>									
+										<select name="search_key" class="form-control" id="search_key" style="width:200px">
+											<option value='0' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '0') ? 'selected=selected' : ''?>>Выберите поисковый ключ</option>
+											<option value ='1' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '1') ? 'selected=selected' : ''?>>Телефон</option>
+											<option value ='2' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '2') ? 'selected=selected' : ''?>>Номер декларации</option>
+											<option value ='3' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '3') ? 'selected=selected' : ''?>>ФИО покупателя</option>
+											?>
+										</select>									
+									</div>					  
+								  <button type="submit" class="btn btn-default">Показать</button>
+								</form>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			<?php } ?>	
 		<?php }?>
     </div>
   </div>
