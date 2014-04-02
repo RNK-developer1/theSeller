@@ -218,7 +218,6 @@
 											<option value ='1' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '1') ? 'selected=selected' : ''?>>Телефон</option>
 											<option value ='2' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '2') ? 'selected=selected' : ''?>>Номер декларации</option>
 											<option value ='3' <?php echo (!$_GET['search_key'] OR $_GET['search_key'] == '3') ? 'selected=selected' : ''?>>ФИО покупателя</option>
-											?>
 										</select>									
 									</div>					  
 								  <button type="submit" class="btn btn-default">Показать</button>

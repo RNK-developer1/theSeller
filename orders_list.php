@@ -71,8 +71,9 @@
 					TIMESTAMPDIFF(MINUTE, orders.inwork_time, NOW()) as editor_time"					
 			.($_SESSION['user']['group_id'] == 2 ? 
 			"   FROM statuses as statuses1, statuses as statuses2, statuses as statuses3, users as owner, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
-					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
-					LEFT JOIN (select order_id, date as send_time, activity from orders_audit) as send_times ON orders.id = send_times.order_id  
+					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id " . (
+					($_GET['count_days'] and $_GET['count_days'] > 2) ? " 
+					LEFT JOIN (select order_id, date as send_time, activity from orders_audit) as send_times ON orders.id = send_times.order_id " : "") . "
 				WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
 						 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
 						 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
@@ -96,8 +97,9 @@
 					($_GET['search_key'] and $_GET['search_key'] == 3 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND orders.fio = '" . $_GET['search_text'] . "' " : "") . "
 					GROUP BY orders.id ORDER BY " :
 			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
-					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id  
-					LEFT JOIN (select order_id, date as send_time from orders_audit) as send_times ON orders.id = send_times.order_id  
+					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id " . (
+					($_GET['count_days'] and $_GET['count_days'] > 2) ? " 
+					LEFT JOIN (select order_id, date as send_time, activity from orders_audit) as send_times ON orders.id = send_times.order_id " : "") . " 
 				WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
 						 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
 						 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
