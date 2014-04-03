@@ -41,6 +41,10 @@
 		}
 	}
 
+	$order_id_search = "";
+	if ($_GET['search_key'] and $_GET['search_key'] == 4 and $_GET['search_text'] and !empty($_GET['search_text'])) {
+		$order_id_search = " AND (orders.id = '" . $_GET['search_text'] . "') ";
+	} 
 
 		$query = " 
 				SELECT SQL_CALC_FOUND_ROWS
@@ -119,7 +123,8 @@
 					($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
 					($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = '" . strip_phone($_GET['search_text']) . "' " : "") . ( 
 					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND (orders.newpost_id = '" . $_GET['search_text'] . "' OR orders.newpost_backorder = '" . $_GET['search_text'] . "') " : "") . 
-					$fio_search . "
+					$fio_search .  
+					$order_id_search . "
 					GROUP BY orders.id ORDER BY " :
 			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
 					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id " . (
@@ -147,7 +152,8 @@
 					($_GET['count_days'] and $_GET['count_days'] > 2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
 					($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = '" . strip_phone($_GET['search_text']) . "' " : "") . ( 
 					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND (orders.newpost_id = '" . $_GET['search_text'] . "' OR orders.newpost_backorder = '" . $_GET['search_text'] . "') " : "") . 
-					$fio_search . "
+					$fio_search .  
+					$order_id_search . "
 					GROUP BY orders.id ORDER BY editor_ord DESC,"					
 			)." alert DESC, status_priority DESC, created_at ".($_GET['archive'] ? 'DESC':'ASC')." LIMIT ".$page_start.",500";	
 
