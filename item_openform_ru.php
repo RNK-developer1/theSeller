@@ -16,19 +16,19 @@
 		$stmt = $db->prepare($query); 
 		$result = $stmt->execute($query_params); 
 	} 
-	catch(PDOException $ex){ die("Невозможно выполнить запрос: " . $ex->getMessage()); } 
+	catch(PDOException $ex){ die("РќРµРІРѕР·РјРѕР¶РЅРѕ РІС‹РїРѕР»РЅРёС‚СЊ Р·Р°РїСЂРѕСЃ: " . $ex->getMessage()); } 
 	
 	$item = $stmt->fetch(); 
     if(!$item){
 		header("Location: items_list.php"); 
-		die("Перенаправление: items_list.php"); 
+		die("РџРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёРµ: items_list.php"); 
 	}
 ?>
 
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>Форма заказа</title>
+<title>Р¤РѕСЂРјР° Р·Р°РєР°Р·Р°</title>
 <style type="text/css">
 	body {
 		font-family: Helvetica, Arial, sans-serif;
@@ -112,11 +112,11 @@
 	<input type="hidden" id="user_id<?php echo $uid;?>" name="user_id" value="1">
 	<div style="width:402px; height: 270px; border: 1px solid #ccc; border-radius: 5px; padding: 10px 0;">
 		<div style="padding: 10px 20px">
-			<div>Имя:</div>
+			<div>РРјСЏ:</div>
 			<INPUT name="name" class=input value="" maxlength=50>
 		</div>
 		<div style="padding: 10px 20px">
-			<div>Телефон мобильный: <span style="color:red">*</span></div>
+			<div>РўРµР»РµС„РѕРЅ РјРѕР±РёР»СЊРЅС‹Р№: <span style="color:red">*</span></div>
 			<input style="font-size: 18px;" name="phone" class="phone" id="phone_mob_<?php echo $uid;?>" maxlength=14 placeholder='(___)___-__-__'>
 		</div>
 		<div style="width: 100%;">
@@ -133,7 +133,7 @@ function checkForm_13(f)
 {
  if(!f.phone.value.match(/^\(\d\d\d\)\d\d\d-\d\d-\d\d$/i))
  {
-	 alert ("Введите корректно Ваш номер телефона!");
+	 alert ("Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅРѕ Р’Р°С€ РЅРѕРјРµСЂ С‚РµР»РµС„РѕРЅР°!");
 	 f.phone.focus();
 	 return false;
  }
