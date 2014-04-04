@@ -22,12 +22,13 @@
 	$item = $stmt->fetch();
 	
 	$query = " 
-            INSERT INTO item (day_back, owner_id, uuid, name, price, price_min, param1_name, param2_name, param1, param2, url, weight, width, height, length, yandexmetric, yandexgoal, yandexgoal2, mail_template, mail_subject, npmail_subject, npmail_template, finish_screen, finish_screen_fast, conf_block)
-					   VALUES (:day_back, :owner_id, :uuid, :name, :price, :price_min, :param1_name, :param2_name, :param1, :param2, :url, :weight, :width, :height, :length, :yandexmetric, :yandexgoal, :yandexgoal2,  :mail_template, :mail_subject, :npmail_subject, :npmail_template, :finish_screen, :finish_screen_fast, :conf_block)
+            INSERT INTO item (day_back, owner_id, uuid, name, short_name, price, price_min, param1_name, param2_name, param1, param2, url, weight, width, height, length, yandexmetric, yandexgoal, yandexgoal2, mail_template, mail_subject, npmail_subject, npmail_template, finish_screen, finish_screen_fast, conf_block)
+					   VALUES (:day_back, :owner_id, :uuid, :name, :short_name, :price, :price_min, :param1_name, :param2_name, :param1, :param2, :url, :weight, :width, :height, :length, :yandexmetric, :yandexgoal, :yandexgoal2,  :mail_template, :mail_subject, :npmail_subject, :npmail_template, :finish_screen, :finish_screen_fast, :conf_block)
         "; 
 	$query_params = array( 
 		':owner_id' => $item['owner_id'],
 		':name' => $item['name'],
+		':name' => $item['short_name'],
 		':price' => $item['price'],
 		':price_min' => $item['price_min'],
 		':day_back' => $item['day_back'] ? $item['day_back'] : 5,

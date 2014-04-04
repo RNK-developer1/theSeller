@@ -65,7 +65,43 @@
 <div class="container">
 	<h3>Товары</h3>
     
-	<p><a data-toggle="modal" href="#myModal" class="btn btn-primary btn-lg">Добавить товар</a></p>
+	<p><a data-toggle="modal" href="#myModal" class="btn btn-primary btn-lg">Добавить товар</a>
+	<a data-toggle="modal" href="#myModalTemplSMS" class="btn btn-default btn-sm">Шаблоны SMS</a>
+						  <div class="modal fade" id="myModalTemplSMS">
+							<div class="modal-dialog">
+							  <div class="modal-content">
+								<div class="modal-header">
+								  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+								  <h4 class="modal-title">Шаблоны SMS</h4>
+								</div>
+								<form action='profile_sms_update.php' method='POST'>
+									<div class="modal-body">
+										<div class="form-group">				
+											<label>SMS "Успей забрать"</label>
+											<input class="form-control" type='text' name='sms_catch' value='<?php echo $_SESSION['user']['sms_catch'] ? $_SESSION['user']['sms_catch'] : "Успейте забрать {item} Уедет обратно {dt} Накл.{decl}"; ?>'>
+										</div>
+										<div><i>
+											<p>Шаблон должен быть коротким!</p>
+											<p>{item} будет заменено на короткое название товара</p>
+											<p>{decl} будет заменено на номер декларации</p>
+											<p>{dt} будет заменено датой обратной отправки</p>
+										</i>
+										</div>
+										<br/>
+										<div class="form-group">				
+											<label>SMS "Не берут трубку"</label>
+											<input class="form-control" type='text' name="sms_nbt" value='<?php echo $_SESSION['user']['sms_nbt']; ?>'>											
+										</div>
+										
+									</div>													
+									<div class="modal-footer">
+									  <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+									  <input type="submit" class="btn btn-primary" value='Сохранить'>
+									</div>
+								</form>
+							  </div>
+							</div>
+						  </div></p>
 	  <div class="modal fade" id="myModal">
 		<div class="modal-dialog">
 		  <div class="modal-content">
@@ -78,6 +114,8 @@
 					<div class="form-group">				
 						<label>Название</label>
 						<input class="form-control" type='text' name='name'>
+						<label>Короткое название</label>
+						<input class="form-control" type='text' name='short_name'>
 						<label>Cайт (полная ссылка с http://)</label>
 						<input class="form-control" type='text' name='url'>
 					</div>
@@ -136,9 +174,9 @@
 	<?php	foreach ($requests as $row){ ?>
 				<tr id="item_<?php echo $row['uuid']?>">
 				<td><?php echo $row['uuid']; if ($_GET['seller_id'] == '0') {echo '<br/><small>'.$row['username'].'</small><br/>';} ?>
-					<a href="item_toggle_active.php?id=<?php echo $row['uuid'];?>&<?php echo $row['inactive'] ? '' : 'inactive=inactive'?>" class="btn btn-<?php echo $row['inactive'] ? 'danger' : 'success'?>"><?php echo $row['inactive'] ? 'Неактивный' : 'Активный'?></a>
+					<br/><a href="item_toggle_active.php?id=<?php echo $row['uuid'];?>&<?php echo $row['inactive'] ? '' : 'inactive=inactive'?>" class="btn btn-<?php echo $row['inactive'] ? 'danger' : 'success'?>"><?php echo $row['inactive'] ? 'Неактивный' : 'Активный'?></a>
 				</td>
-				<td><?php if ( $row['url'] ) { echo "<a target=\"_blank\" href=\"".$row['url']."\">".$row['name']."</a>"; } else { echo $row['name']; } ?></td>
+				<td><?php if ( $row['url'] ) { echo "<a target=\"_blank\" href=\"".$row['url']."\">".$row['name']."</a>"; } else { echo $row['name']; } ?><br/><small><?php echo $row['short_name']?></small></td>
 				<td><?php echo number_format($row['price'],2) ?><br/>min: <?php echo $row['price_min'] ? number_format($row['price_min'],2) : 'н/д';?></td>
 				<td>					
 						<a data-toggle="modal" href="#myModalMail<?php echo $row['uuid'] ?>" class="btn btn-default btn-sm">Письмо</a>
@@ -350,6 +388,8 @@
 										<div class="form-group">				
 											<label>Название</label>
 											<input class="form-control" type='text' name='name' value='<?php echo $row['name'] ?>'>
+											<label>Короткое название</label>
+											<input class="form-control" type='text' name='short_name' value='<?php echo $row['short_name'] ?>'>									
 											<label>Cайт (полная ссылка с http://)</label>
 											<input class="form-control" type='text' name='url' value='<?php echo $row['url'] ?>'>
 										</div>

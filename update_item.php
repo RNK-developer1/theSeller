@@ -28,13 +28,14 @@
 	
 	$row = $stmt->fetch(); 
     if($row){
-		$query = "UPDATE item SET name = :name, day_back = :day_back, price = :price, price_min = :price_min, param1_name = :param1_name, param2_name = :param2_name, param1 = :param1, param2 = :param2, url = :url, weight = :weight, width = :width, height = :height, length = :length, yandexmetric = :yandexmetric, yandexgoal = :yandexgoal, yandexgoal2 = :yandexgoal2 WHERE uuid = :uuid AND owner_id = :owner_id";
+		$query = "UPDATE item SET name = :name, short_name = :short_name, day_back = :day_back, price = :price, price_min = :price_min, param1_name = :param1_name, param2_name = :param2_name, param1 = :param1, param2 = :param2, url = :url, weight = :weight, width = :width, height = :height, length = :length, yandexmetric = :yandexmetric, yandexgoal = :yandexgoal, yandexgoal2 = :yandexgoal2 WHERE uuid = :uuid AND owner_id = :owner_id";
 		
 		$query_params = array( 
 			':owner_id' => $row['owner_id'],
 			':uuid' => $_GET['id'],
 			':day_back' => $_GET['day_back'],
 			':name' => $_GET['name'],
+			':short_name' => $_GET['short_name'],
 			':price' => $_GET['price'],
 			':price_min' => $_GET['price_min'],
 			':param1_name' => $_GET['param1_name'],
