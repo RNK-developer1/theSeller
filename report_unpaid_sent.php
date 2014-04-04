@@ -1,68 +1,68 @@
-<?php
-	require("config.php"); 	
-
-	if (empty($_SESSION['user']) || $_SESSION['user']['active'] == 0 || $_SESSION['user']['group_id'] != 2) {
-		header("Location: index.php"); 
-		die("Перенаправление: index.php"); 
-	}
-
-	$query = " 
-			SELECT 
-				item.uuid as uuid,
-				item.name as name
-			FROM users as owner, item
-			WHERE
-				item.owner_id = owner.id AND
-				(:seller_id = '0' OR owner.id = :seller_id)
-		";		
-	$query_params = array( 
-			':seller_id' => $_GET['seller_id'] || (!$_GET['seller_id'] && $_GET['seller_id']=='0') ? $_GET['seller_id'] : $_SESSION['user']['id'],
-		);		
-			 
-	try{ 
-		$stmt = $db->prepare($query); 
-		$result = $stmt->execute($query_params); 
-	} 
-	catch(PDOException $ex){ die("Невозможно выполнить запрос01: " . $ex->getMessage()); } 
-	
-	$select_items = $stmt->fetchAll();
-	
-	$query = " 
-				SELECT 
-					*
-				FROM
-					statuses				
-				WHERE id <> 0
-				ORDER BY id ASC
-			"; 
-	try{ 
-		$stmt = $db->prepare($query); 
-		$result = $stmt->execute($query_params); 
-	} 
-	catch(PDOException $ex){ die("Невозможно выполнить запрос02: " . $ex->getMessage()); } 
-	
-	$statuses_step1 = $stmt->fetchAll();
-
-	$select_sellers = array();
-	$query = " 
-				SELECT 
-					CONCAT(REPEAT(' -',sellers_for_sellers.depth),users.username) as username,
-					users.id as id
-				FROM sellers_for_sellers, users
-				WHERE
-					users.id = sellers_for_sellers.subseller_id
-					AND sellers_for_sellers.seller_id = 24
-			";		
-		$query_params = array( 
-		); 
-			 
-	try{ 
-		$stmt = $db->prepare($query); 
-		$result = $stmt->execute($query_params); 
-	} 
-	catch(PDOException $ex){ die("Невозможно выполнить запрос03: " . $ex->getMessage()); } 
-	
-	$select_sellers = array_merge($select_sellers,$stmt->fetchAll());	
+<?php
+	require("config.php"); 	
+
+	if (empty($_SESSION['user']) || $_SESSION['user']['active'] == 0 || $_SESSION['user']['group_id'] != 2) {
+		header("Location: index.php"); 
+		die("Перенаправление: index.php"); 
+	}
+
+	$query = " 
+			SELECT 
+				item.uuid as uuid,
+				item.name as name
+			FROM users as owner, item
+			WHERE
+				item.owner_id = owner.id AND
+				(:seller_id = '0' OR owner.id = :seller_id)
+		";		
+	$query_params = array( 
+			':seller_id' => $_GET['seller_id'] || (!$_GET['seller_id'] && $_GET['seller_id']=='0') ? $_GET['seller_id'] : $_SESSION['user']['id'],
+		);		
+			 
+	try{ 
+		$stmt = $db->prepare($query); 
+		$result = $stmt->execute($query_params); 
+	} 
+	catch(PDOException $ex){ die("Невозможно выполнить запрос01: " . $ex->getMessage()); } 
+	
+	$select_items = $stmt->fetchAll();
+	
+	$query = " 
+				SELECT 
+					*
+				FROM
+					statuses				
+				WHERE id <> 0
+				ORDER BY id ASC
+			"; 
+	try{ 
+		$stmt = $db->prepare($query); 
+		$result = $stmt->execute($query_params); 
+	} 
+	catch(PDOException $ex){ die("Невозможно выполнить запрос02: " . $ex->getMessage()); } 
+	
+	$statuses_step1 = $stmt->fetchAll();
+
+	$select_sellers = array();
+	$query = " 
+				SELECT 
+					CONCAT(REPEAT(' -',sellers_for_sellers.depth),users.username) as username,
+					users.id as id
+				FROM sellers_for_sellers, users
+				WHERE
+					users.id = sellers_for_sellers.subseller_id
+					AND sellers_for_sellers.seller_id = 24
+			";		
+		$query_params = array( 
+		); 
+			 
+	try{ 
+		$stmt = $db->prepare($query); 
+		$result = $stmt->execute($query_params); 
+	} 
+	catch(PDOException $ex){ die("Невозможно выполнить запрос03: " . $ex->getMessage()); } 
+	
+	$select_sellers = array_merge($select_sellers,$stmt->fetchAll());	
 
 $query = "SELECT  users.username as seller, item,sum(item_count) as itog, sum(item_price) as sum
 						FROM orders
@@ -70,62 +70,62 @@ $query = "SELECT  users.username as seller, item,sum(item_count) as itog, sum(it
 						WHERE status_step2 IN (202,204,206,207,208,220,222,223)
 						AND  status_step3 = 0 AND status_step1 > 50
 						AND
-						(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id) AND
+						(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id) AND
 						(:seller_id = '0' OR users.id = :seller_id) 
 						GROUP BY seller,item with rollup
 ";
-  					
-		$query_params = array( 
-				':user_id' => $_SESSION['user']['id'],
-				':item_id' => $_GET['item_id'],
-				':seller_id' => $_GET['seller_id']
-			); 
- 
-	try{ 
-		$stmt = $db->prepare($query); 
-		$result = $stmt->execute($query_params); 
-	} 
-	catch(PDOException $ex){ die("Невозможно выполнить запрос3: " . $ex->getMessage()); } 
-	
-	$orders_unpaids = $stmt->fetchAll();
-?>
-
-<!doctype html>
-<html lang="ru">
+  					
+		$query_params = array( 
+				':user_id' => $_SESSION['user']['id'],
+				':item_id' => $_GET['item_id'],
+				':seller_id' => $_GET['seller_id']
+			); 
+ 
+	try{ 
+		$stmt = $db->prepare($query); 
+		$result = $stmt->execute($query_params); 
+	} 
+	catch(PDOException $ex){ die("Невозможно выполнить запрос3: " . $ex->getMessage()); } 
+	
+	$orders_unpaids = $stmt->fetchAll();
+?>
+
+<!doctype html>
+<html lang="ru">
 <?php include 'header.php' ?>
-<link href="assets/main.css" rel="stylesheet" media="screen">
-<body>
-	<?php include 'top_menu.php' ?>
-	<div style="display: none;">
-	</div>
-	<div class="container">
+<link href="assets/main.css" rel="stylesheet" media="screen">
+<body>
+	<?php include 'top_menu.php' ?>
+	<div style="display: none;">
+	</div>
+	<div class="container">
 		<a href="reports.php">&larr; Вернуться в меню отчетов</a>
-	<div class="conthead">
-		<h2><?php echo 'Отчет по неоплаченным отправленным товарам'?></h2>
-	</div>
-	<?php if(count($orders_unpaids)>0):	
+	<div class="conthead">
+		<h2><?php echo 'Отчет по неоплаченным отправленным товарам'?></h2>
+	</div>
+	<?php if(count($orders_unpaids)>0):	
 			$current_seller = '';
-			$current_item = '';
+			$current_item = '';
 			foreach ($orders_unpaids as $order_unpaid) {
 				
-				if ($current_seller != $order_unpaid['seller'])  {
-					if ($current_seller != '') {
-						echo '</table>';
-					}
-			?>
-				<h3><?php echo $order_unpaid['seller']; $current_seller=$order_unpaid['seller']; ?></h3>
-					<table border="1">
-						<thead>
-							<tr>
-								<th style="width: 300px;">Наименование</th>
-								<th style="width: 50px;">Количество</th>
+				if ($current_seller != $order_unpaid['seller'])  {
+					if ($current_seller != '') {
+						echo '</table>';
+					}
+			?>
+				<h3><?php echo $order_unpaid['seller']; $current_seller=$order_unpaid['seller']; ?></h3>
+					<table border="1">
+						<thead>
+							<tr>
+								<th style="width: 300px;">Наименование</th>
+								<th style="width: 50px;">Количество</th>
 								<th style="width: 50px;">Cумма</th>
-																									
-							</tr>
-						</thead>
-			<?php } ?>	
+																									
+							</tr>
+						</thead>
+			<?php } ?>	
 					<?php if(sizeof($order_unpaid['item'])==0): ?>
-						<tr class="alt">
+						<tr class="alt">
 							<td><?php echo 'ИТОГО'?></td>
 						<?php endif?>
 						<?php if(sizeof($order_unpaid['item'])>0 ): ?>
@@ -133,13 +133,13 @@ $query = "SELECT  users.username as seller, item,sum(item_count) as itog, sum(it
 						<?php endif?>
 							<td><?php echo $order_unpaid['itog']?></td>
 							<td><?php echo $order_unpaid['sum']?></td>
-					
-						</tr>			
-			<?php }?>	
+					
+						</tr>			
+			<?php }?>	
 					</table>
 	<?php else:
 		echo '<div style="text-alignt:center;">Нет неоплаченных товаров!</div>';
 	endif?>
-</div>
-</body>
+</div>
+</body>
 </html>
