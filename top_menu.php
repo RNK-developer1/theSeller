@@ -1,4 +1,5 @@
 <?php
+
 	$url = $_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]; 
 	$url_array = (parse_url($url));
 	$path_parts = pathinfo($url_array['path']);
@@ -6,6 +7,22 @@
 	$filter_orders = array(
 		'orders_list.php',
 	);
+
+	$filter_options = array(); 
+	$selected_seller = 0;
+	$filter_options['selected_seller_id'] = 0;
+	if ($_GET['seller_id'] OR $_GET['seller_id'] == '0') {
+		$selected_seller = $_GET['seller_id'];
+		$filter_options['selected_seller_id'] = $_GET['seller_id'];
+	} else if ($_SESSION['filter_options'] AND $_SESSION['filter_options']['selected_seller_id']) {
+		$selected_seller = $_SESSION['filter_options']['selected_seller_id'];
+		$filter_options['selected_seller_id'] = $_SESSION['filter_options']['selected_seller_id'];
+	} else if (!$_GET['seller_id'] and $_GET['seller_id'] != '0' and $_SESSION['user']['group_id']==2) {
+		$selected_seller = $_SESSION['user']['id'];
+		$filter_options['selected_seller_id'] = $_SESSION['user']['id'];
+	}
+	$_SESSION['filter_options'] = $filter_options;
+
 ?>
 <div class="navbar navbar-fixed-top">
   <div class="container">
@@ -25,15 +42,15 @@
 						<p><a href='reg_requests.php' class='btn btn-default'>Заявки на регистрацию</a></p>
 						<p><a href='reg_list.php' class='btn btn-default'>Подчиненные</a></p>
 						<p><a href='items_list.php' class='btn btn-default'>Справочник товаров</a></p>		
-						<p><a href='reports.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчеты</a></p>								
+						<p><a href='reports.php?order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчеты</a></p>								
 						<p><a href='orders_list.php' class='btn btn-default'>Текущие заказы</a></p>
 						<p><a href='orders_list.php?archive=1' class='btn btn-default'>Архив заказов</a></p>
 						<p><a href='preorders_list.php' class='btn btn-default'>Посещения</a></p>
 					<?php } else if (!empty($_SESSION['user']) and $_SESSION['user']['group_id'] == 1) { ?> 
 						<p><a href='profile.php' class='btn btn-default'>Профиль пользователя</a></p>
-						<p><a href='orders_list.php?seller_id=0&oper=1' class='btn btn-default'>Текущие заказы</a></p>
-						<p><a href='orders_list.php?seller_id=0&archive=1' class='btn btn-default'>Архив заказов</a></p>
-						<p><a href='preorders_list.php?seller_id=0' class='btn btn-default'>Посещения</a></p>
+						<p><a href='orders_list.php?oper=1' class='btn btn-default'>Текущие заказы</a></p>
+						<p><a href='orders_list.php?archive=1' class='btn btn-default'>Архив заказов</a></p>
+						<p><a href='preorders_list.php' class='btn btn-default'>Посещения</a></p>
 					<?php } ?>
 				</ul>
 			</li>
@@ -95,10 +112,12 @@
 									</div>
 									<div class="form-group">
 										<select name="seller_id" class="form-control" id="seller_id" style="max-width: 180px" onchange="$(this).closest('form').trigger('submit');">
-											<option value='0' <?php echo ($_GET['seller_id'] == '0') ? 'selected=selected' : ''?>>Всех</option>
+											<option value='0' <?php echo ($selected_seller_id /*$_GET['seller_id']*/ == '0') ? 'selected=selected' : ''?>>Всех</option>
 											<?php
-											foreach ($select_sellers as $seller) {
-												echo "<option ".(($_GET['seller_id'] == $seller['id'] or (!$_GET['seller_id'] and $_GET['seller_id'] != '0' and $_SESSION['user']['group_id']==2 and $seller['id'] == $_SESSION['user']['id'])) ? 'selected=selected' : '')." value=".$seller['id'].">".$seller['username']."</option>";
+											foreach ($select_sellers as $seller) { if ($selected_seller == $seller['id']) echo $seller['id'] . $seller['username'];
+												echo "<option " . (($selected_seller == $seller['id']) ? 'selected=selected' : '') . 
+													" value=" . $seller['id'] . ">" . $seller['username'] . "</option>";
+												//echo "<option ".(($_GET['seller_id'] == $seller['id'] or (!$_GET['seller_id'] and $_GET['seller_id'] != '0' and $_SESSION['user']['group_id']==2 and $seller['id'] == $_SESSION['user']['id'])) ? 'selected=selected' : '')." value=".$seller['id'].">".$seller['username']."</option>";
 											}
 											?>
 										</select>
