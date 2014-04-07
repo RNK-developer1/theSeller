@@ -16,7 +16,7 @@
 				(:seller_id = '0' OR owner.id = :seller_id)
 		";		
 	$query_params = array( 
-			':seller_id' => $_GET['seller_id'] || (!$_GET['seller_id'] && $_GET['seller_id']=='0') ? $_GET['seller_id'] : $_SESSION['user']['id'],
+			':seller_id' => $selected_seller || (!$selected_seller && $selected_seller=='0') ? $selected_seller : $_SESSION['user']['id'],
 		);		
 			 
 	try{ 
@@ -78,7 +78,7 @@ $query = "SELECT  users.username as seller, item,sum(item_count) as itog, sum(it
 		$query_params = array( 
 				':user_id' => $_SESSION['user']['id'],
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $_GET['seller_id']
+				':seller_id' => $selected_seller
 			); 
  
 	try{ 

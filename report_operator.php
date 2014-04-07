@@ -20,7 +20,7 @@
 					sellers_for_sellers.seller_id = :user_id
 			";		
 		$query_params = array( 
-			':user_id' => $_SESSION['user']['id']
+			':user_id' => $selected_seller
 		); 
 			 
 	try{ 
@@ -31,7 +31,7 @@
 	
 	$select_sellers = $stmt->fetchAll();
 
-	if ($_GET['seller_id'] AND $_GET['seller_id'] != '0') {
+	if ($selected_seller != '0') {
 		$query = " 
 					SELECT *
 					FROM users
@@ -39,7 +39,7 @@
 						id = :user_id
 				";		
 			$query_params = array( 
-				':user_id' => $_GET['seller_id']
+				':user_id' => $selected_seller
 			); 
 				 
 		try{ 
@@ -51,7 +51,7 @@
 		$selected_user = $stmt->fetch();	
 	}
 	
-	if ($_GET['seller_id']) {
+	if ($selected_seller != 0) {
 		$query = " 
 					SELECT activity, COUNT(*) as number
 					FROM orders_audit
@@ -64,7 +64,7 @@
 					ORDER BY activity ASC
 				";		
 			$query_params = array( 
-				':user_id' => $_GET['seller_id'],
+				':user_id' => $selected_seller,
 				':order_date' => $_GET['order_date'],
 				':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date']
 			); 
@@ -91,7 +91,7 @@
 <div class="container">
 <a href="reports.php">&larr; Вернуться в меню отчетов</a>
 	<?php 
-	if ($_GET['seller_id']) {?>
+	if ($selected_seller != 0) {?>
 		<h3>Отчет по оператору <?php if ($selected_user) {echo $selected_user['username'].' ';} if ($_GET['order_date']) {?>с <?php echo $dstart->format('d-m-y'); ?> по <?php echo $dend->format('d-m-y'); }?> </h3>
 		<table>
 		<?php foreach ($stats as $act) { ?>
