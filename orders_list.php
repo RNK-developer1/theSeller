@@ -5,6 +5,21 @@
 		header("Location: index.php"); 
 		die("Перенаправление: index.php"); 
 	}		
+
+		$filter_options = array(); 
+	$selected_seller = 0;
+	$filter_options['selected_seller_id'] = 0;
+	if ($_GET['seller_id'] OR $_GET['seller_id'] == '0') {
+		$selected_seller = $_GET['seller_id'];
+		$filter_options['selected_seller_id'] = $_GET['seller_id'];
+	} else if ($_SESSION['filter_options'] AND $_SESSION['filter_options']['selected_seller_id']) {
+		$selected_seller = $_SESSION['filter_options']['selected_seller_id'];
+		$filter_options['selected_seller_id'] = $_SESSION['filter_options']['selected_seller_id'];
+	} else if (!$_GET['seller_id'] and $_GET['seller_id'] != '0' and $_SESSION['user']['group_id']==2) {
+		$selected_seller = $_SESSION['user']['id'];
+		$filter_options['selected_seller_id'] = $_SESSION['user']['id'];
+	}
+	$_SESSION['filter_options'] = $filter_options;
 	
 	function strip_phone ($str_temp) {
 
@@ -160,7 +175,7 @@
 		$query_params =  
 			array( 
 				':user_id' => $_SESSION['user']['id'],
-				':seller_id' => (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']),
+				':seller_id' => (($selected_seller or $selected_seller == '0') ? $selected_seller : $_SESSION['user']['id']),
 				':item_id' => $_GET['item_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $_GET['order_date'],
@@ -251,11 +266,11 @@
 				");		
 			if ($_SESSION['user']['group_id'] == 2) {
 			$query_params = array( 
-				':seller_id' => $_GET['seller_id'] || (!$_GET['seller_id'] && $_GET['seller_id']=='0') ? $_GET['seller_id'] : $_SESSION['user']['id'],
+				':seller_id' => $selected_seller || (!$selected_seller && $selected_seller=='0') ? $selected_seller : $_SESSION['user']['id'],
 				':user_id' => $_SESSION['user']['id']
 			); } else { 
 			$query_params = array( 
-				':owner_id' => $_GET['seller_id'],
+				':owner_id' => $selected_seller,
 				':user_id' => $_SESSION['user']['id']
 			); }
 			
@@ -297,7 +312,7 @@
 					
 		$query_params = array( 
 				':user_id' => $_SESSION['user']['id'],
-				':seller_id' => (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']),
+				':seller_id' => (($selected_seller or $selected_seller == '0') ? $selected_seller : $_SESSION['user']['id']),
 				':item_id' => $_GET['item_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $_GET['order_date'],
@@ -348,7 +363,7 @@
 		$query_params =  
 			array( 
 				':user_id' => $_SESSION['user']['id'],
-				':seller_id' => (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']),
+				':seller_id' => (($selected_seller or $selected_seller == '0') ? $selected_seller : $_SESSION['user']['id']),
 				':item_id' => $_GET['item_id'],
 				':order_date' => $_GET['order_date'],
 				':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date']
@@ -452,7 +467,7 @@
 	$loc = '';
 	if ($_GET['archive']) {$loc .= '&archive='.$_GET['archive'];}
 	if ($_GET['oper']) {$loc .= '&oper='.$_GET['oper'];}
-	if ($_GET['seller_id'] or $_GET['seller_id'] == '0') {$loc .= '&seller_id='.$_GET['seller_id'];}
+	if ($selected_seller or $selected_seller == '0') {$loc .= '&seller_id='.$selected_seller;}
 	if ($_GET['item_id']or $_GET['item_id'] == '0') {$loc .= ($loc!='' ? '&item_id=' : '?item_id=').$_GET['item_id'];}
 	if ($_GET['status_id']) {$loc .= '&status_id='.$_GET['status_id'];}
 	if ($_GET['order_date']) {$loc .= '&order_date='.$_GET['order_date'];}	
@@ -527,14 +542,14 @@
 	} 
 		if ($_GET['page']) {$loc .= '&page='.$_GET['page'];}
 		if (!$_GET['archive']) { ?>
-		<a href="newpost_list.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-success">Передать список подтвержденных заказов в Н.П</a>
-		<a href="newpost_preview.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-warning">Просмотр списка на печать</a>
-		<a href="newpost_print.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-default">Распечатать декларации</a>
-		<a href="newpost_print_reset.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" class="btn btn-danger">Обнулить неотправленные декларации</a>
+		<a href="newpost_list.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($selected_seller or $selected_seller=='0') {echo '&seller_id='.$selected_seller; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-success">Передать список подтвержденных заказов в Н.П</a>
+		<a href="newpost_preview.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($selected_seller or $selected_seller=='0') {echo '&seller_id='.$selected_seller; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-warning">Просмотр списка на печать</a>
+		<a href="newpost_print.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($selected_seller or $selected_seller=='0') {echo '&seller_id='.$selected_seller; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-default">Распечатать декларации</a>
+		<a href="newpost_print_reset.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($selected_seller or $selected_seller=='0') {echo '&seller_id='.$selected_seller; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" class="btn btn-danger">Обнулить неотправленные декларации</a>
 		<?php if ($_SESSION['user']['group_id'] == 2) { ?>
-			<a href="money_list.php?r=1<?php if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} else {echo '&seller_id='.$_SESSION['user']['id'];} ?>" target="_new" class="btn btn-success">Получение денег</a>
+			<a href="money_list.php?r=1<?php if ($selected_seller or $selected_seller=='0') {echo '&seller_id='.$selected_seller; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} else {echo '&seller_id='.$_SESSION['user']['id'];} ?>" target="_new" class="btn btn-success">Получение денег</a>
 		<?php } ?>
-		<a href="newpost_backsent_preview.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($_GET['seller_id'] or $_GET['seller_id']=='0') {echo '&seller_id='.$_GET['seller_id']; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-warning">Ближайшие возвраты</a>
+		<a href="newpost_backsent_preview.php?r=1<?php if ($_GET['oper']) {echo '&oper='.$_GET['oper'];}; if ($selected_seller or $selected_seller=='0') {echo '&seller_id='.$selected_seller; if ($_GET['item_id']) {echo '&item_id='.$_GET['item_id'];}} ?>" target="_new" class="btn btn-warning">Ближайшие возвраты</a>
 	<?php } ?>	
 	</span>
 	<h3 id='inwork_fin' style='display: none;'>Завершите обработку заказа!</h3>
@@ -640,8 +655,8 @@
 								<form action='order_archive.php' method='GET'>		
 									<input type='hidden' name='id' value='<?php echo $ord['id']?>'>								
 									<?php $prop_st3 = (($ord['status_step3'] == '311' or $ord['status_step3'] == '312') ? '20' : ($ord['status_step2'] == '242' ? '31' : '30'));?>
-									<?php if ($_GET['seller_id'] or $_GET['seller_id'] == '0') { ?>
-										<input type='hidden' name='seller_id' value='<?php echo $_GET['seller_id']?>'>
+									<?php if ($selected_seller or $selected_seller == '0') { ?>
+										<input type='hidden' name='seller_id' value='<?php echo $selected_seller?>'>
 									<?php }
 										if ($_GET['page']) { ?>
 										<input type='hidden' name='page' value='<?php echo $_GET['page']?>'>
@@ -695,8 +710,8 @@
 												if ($_GET['oper']) { ?>
 												<input type='hidden' name='oper' value='<?php echo $_GET['oper']?>'>
 											<?php } ?>											
-											<?php if ($_GET['seller_id'] or $_GET['seller_id'] == '0') { ?>
-												<input type='hidden' name='seller_id' value='<?php echo $_GET['seller_id']?>'>
+											<?php if ($selected_seller or $selected_seller == '0') { ?>
+												<input type='hidden' name='seller_id' value='<?php echo $selected_seller?>'>
 											<?php }
 												if ($_GET['item_id'] or $_GET['item_id'] == '0') { ?>
 												<input type='hidden' name='item_id' value='<?php echo $_GET['item_id']?>'>
@@ -735,8 +750,8 @@
 										if ($_GET['oper']) { ?>
 										<input type='hidden' name='oper' value='<?php echo $_GET['oper']?>'>
 									<?php } ?>
-									<?php if ($_GET['seller_id'] or $_GET['seller_id'] == '0') { ?>
-										<input type='hidden' name='seller_id' value='<?php echo $_GET['seller_id']?>'>
+									<?php if ($selected_seller or $selected_seller == '0') { ?>
+										<input type='hidden' name='seller_id' value='<?php echo $selected_seller?>'>
 									<?php }
 										if ($_GET['item_id'] or $_GET['item_id'] == '0') { ?>
 										<input type='hidden' name='item_id' value='<?php echo $_GET['item_id']?>'>
