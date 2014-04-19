@@ -28,7 +28,7 @@
 	$query_params = array( 
 		':owner_id' => $item['owner_id'],
 		':name' => $item['name'],
-		':name' => $item['short_name'],
+		':short_name' => $item['short_name'],
 		':price' => $item['price'],
 		':price_min' => $item['price_min'],
 		':day_back' => $item['day_back'] ? $item['day_back'] : 5,
