@@ -1,12 +1,12 @@
-.table_text{
-    color: black;
-}
-.report span{
-    float: right;
-    display: block;
-    width: 5em;
-}
-.table_center_50{
-    width: 50%;
-    margin: 0 auto;
+.table_text{
+    color: black;
+}
+.report span{
+    float: right;
+    display: block;
+    width: 5em;
+}
+.table_center_50{
+    width: 50%;
+    margin: 0 auto;
 }

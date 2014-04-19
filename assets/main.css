@@ -3,16 +3,16 @@
 	padding: 10px 15px;
 	margin: 0;
 	
-}
+}
 .conthead h2 {
 	font-size: 25px;
 	margin: 0;
 	padding: 0;
 	color: #444;
 	letter-spacing: -1px;
-}
+}
 .contentbox {padding: 20px}
-table {border-collapse: collapse}
-th,td {text-align: left; padding: 8px; font-size:14px; color: black;}
-thead tr {background-color: #E0E0E0; font-size: 14px;}
+table {border-collapse: collapse}
+th,td {text-align: left; padding: 8px; font-size:14px; color: black;}
+thead tr {background-color: #E0E0E0; font-size: 14px;}
 tr.alt td{background: #F2F2F2;}
