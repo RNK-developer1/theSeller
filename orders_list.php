@@ -543,7 +543,10 @@
 	if ($_GET['status_id']) {$loc .= '&status_id='.$_GET['status_id'];}
 	if ($_GET['order_date']) {$loc .= '&order_date='.$_GET['order_date'];}	
 	if ($_GET['order_date_end']) {$loc .= '&order_date_end='.$_GET['order_date_end'];}	
-	
+
+	//  =================================================================================================================
+	//  Запрос в сервис http://sms-fly.com/ (начало)
+	//  =================================================================================================================
 	
 	$myXML 	 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 	$myXML 	.= "<request>";
@@ -559,15 +562,36 @@
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $myXML);
 	$response = curl_exec($ch);
+
 	curl_close($ch);
-	
-	try {
-		$balance = new SimpleXMLElement($response);		
-		$balance_msg = $balance->balance;
-	} catch (Exception $e) {
-		$balance_msg = null;
+
+	$responseErrorTest = '<html><head><title>502 Bad Gateway</title></head>' .
+		'<body bgcolor="white"><center><h1>502 Bad Gateway</h1></center><hr><center>nginx/1.4.4</center>' .
+		'</body></html>';
+	$xml_error = false;
+	libxml_use_internal_errors(true);
+	$sxe = simplexml_load_string($response);//"<?xml version='1.0'><broken><xml></broken>");
+	if (!$sxe) {
+		//echo "Ошибка загрузки XML\n";
+		//foreach(libxml_get_errors() as $error) {
+			//echo "\t", $error->message;
+		//}
+		$xml_error = true;
+		$balance_msg = 'Ошибка связи с сервисом  http://sms-fly.com/. ' .
+			'Извините, но в данный момент существует проблема с подключением к серверу баз данных. ' .
+			'Приносим свои извинения, просим Вас зайти немного позже.';
+	} else {
+		try {
+			$balance = new SimpleXMLElement($response);
+			$balance_msg = $balance->balance;
+		} catch (Exception $e) {
+			$balance_msg = null;
+		}
 	}
-	
+
+	//  =================================================================================================================
+	//  Запрос в сервис http://sms-fly.com/ (завершение)
+	//  =================================================================================================================
 ?>
 
 <!doctype html>
@@ -578,7 +602,13 @@
 <div style="display: none;">
 </div>
 <div class="container">
-	<?php if ($balance_msg != NULL and $balance_msg < 20) { echo '<div class="btn-danger">Внимание! На счету SMS-fly осталось: '.$balance_msg.' грн</div>';};?>
+	<?php
+	//  =================================================================================================================
+	//  Запрос в сервис http://sms-fly.com/ (сообщение об ошибках и предупреждениях)
+	//  =================================================================================================================
+		if ($xml_error) { echo '<div class="btn-danger">' . $balance_msg . '</div>'; }
+		else if ($balance_msg != null and $balance_msg < 20) { echo '<div class="btn-danger">Внимание! На счету SMS-fly осталось: ' . $balance_msg .' грн</div>'; } 
+	?>
 	<?php
 		$q_np = 'SELECT TIMESTAMPDIFF(MINUTE , MAX( newpost_last_update ),  NOW() ) as tdf FROM  `orders`';
 		try{ 
