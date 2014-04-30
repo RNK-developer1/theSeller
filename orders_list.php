@@ -4,7 +4,22 @@
 	if (empty($_SESSION['user']) || $_SESSION['user']['active'] == 0) {
 		header("Location: index.php"); 
 		die("Перенаправление: index.php"); 
-	}	
+	}		
+
+		$filter_options = array(); 
+	$selected_seller = 0;
+	$filter_options['selected_seller_id'] = 0;
+	if ($_GET['seller_id'] OR $_GET['seller_id'] == '0') {
+		$selected_seller = $_GET['seller_id'];
+		$filter_options['selected_seller_id'] = $_GET['seller_id'];
+	} else if ($_SESSION['filter_options'] AND $_SESSION['filter_options']['selected_seller_id']) {
+		$selected_seller = $_SESSION['filter_options']['selected_seller_id'];
+		$filter_options['selected_seller_id'] = $_SESSION['filter_options']['selected_seller_id'];
+	} else if (!$_GET['seller_id'] and $_GET['seller_id'] != '0' and $_SESSION['user']['group_id']==2) {
+		$selected_seller = $_SESSION['user']['id'];
+		$filter_options['selected_seller_id'] = $_SESSION['user']['id'];
+	}
+	$_SESSION['filter_options'] = $filter_options;
 	
 	function strip_phone ($str_temp) {
 
@@ -17,47 +32,7 @@
 	}
 
 	$page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
-
-	//  =================================================================================================================
-	//  Схема данных (начало)
-	//  =================================================================================================================
-
-	$data_scheme = " FROM 
-		statuses as statuses1, 
-		statuses as statuses2, 
-		statuses as statuses3, 
-		users as owner, " .
-		($_SESSION['user']['group_id'] == 2 ? 
-		// Текущий пользователь - предприниматель			
-			"operators_for_sellers, " : 
-		// Текущий пользователь - оператор			
-			""
-		) . 
-		"orders " . 
-	"LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref 
-	LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id 
-	LEFT OUTER JOIN users as oper ON oper_id = oper.id 
-	LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
-	LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times 
-		ON orders.id = max_times.order_id " . 
-	(($_GET['count_days'] and $_GET['count_days'] > 2) ? 
-		// первоочередные задачи
-		"LEFT JOIN (select order_id, date as send_time, activity from orders_audit) as send_times 
-			ON orders.id = send_times.order_id " : 
-		// все текущие задачи
-		""
-	);
-
-	//  =================================================================================================================
-	//  Схема данных (завершение)
-	//  =================================================================================================================  
-
-	//  =================================================================================================================
-	//  Поисковый фильтр (начало)
-	//  =================================================================================================================	
 		
-	// 1. Фильтр для поиска по фамилии, имени, отчеству
-	
 	$fio = array();
 	$fio_search = "";
 	if ($_GET['search_key'] and $_GET['search_key'] == 3 and $_GET['search_text'] and !empty($_GET['search_text'])) {
@@ -81,147 +56,101 @@
 		}
 	}
 
-	// 2. Фильтр для поиска по номеру заказа
-
 	$order_id_search = "";
 	if ($_GET['search_key'] and $_GET['search_key'] == 4 and $_GET['search_text'] and !empty($_GET['search_text'])) {
 		$order_id_search = " AND (orders.id = '" . $_GET['search_text'] . "') ";
-	}
+	} 
 
-	//  =================================================================================================================
-	//  Поисковый фильтр (завершение)
-	//  =================================================================================================================	
-
-
-	//  =================================================================================================================
-	//  Фильтр "Архив заказов или текущие заказы" (начало)
-	//  =================================================================================================================
-	
-	$history_order_filter = ($_GET['archive'] ? 
-
-		" ((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
-		(orders.status_step2 > 0 AND orders.status_step2 < 50) OR
-		(orders.status_step3 > 0 AND orders.status_step3 < 50)) AND " :
-
-		" (orders.status_step1 = 0 OR orders.status_step1 > 50) AND
-		(orders.status_step2 = 0 OR orders.status_step2 > 50) AND
-		(orders.status_step3 = 0 OR orders.status_step3 > 50) AND "
-	);
-
-	//  =================================================================================================================
-	//  Фильтр "Архив заказов или текущие заказы" (завершение
-	//  =================================================================================================================
-
-	$query = " 
-		SELECT SQL_CALC_FOUND_ROWS
-			COALESCE(
-				(orders.alert_at <= NOW()),
-				0
-			)										as 'alert',
-			orders.id 								as id,
-			orders.created_at 						as created_at,
-			orders.updated_at 						as updated_at,
-			orders.alert_at 						as alert_at,
-			COALESCE(
-				item.name, 
-				orders.item
-			)										as item,
-			orders.item_price 						as item_price,
-			orders.item_count 						as item_count,
-			orders.item_params 						as item_params,
-			orders.city_area 						as city_area,
-			orders.address 							as address,
-			orders.referrer 						as referrer,
-			orders.request 							as request,
-			orders.ip_src 							as ip_src,
-			warehouses.cityRu 						as np_city_area,
-			warehouses.addressRu 					as np_address,
-			orders.fio 								as fio,
-			orders.phone 							as phone,
-			orders.comment 							as comment,
-			orders.comment2 						as comment2,
-			orders.email 							as email,
-			orders.whs_ref 							as whs_ref,
-			orders.newpost_id 						as newpost_id,
-			orders.newpost_backorder 				as newpost_backorder,
-			orders.newpost_answer 					as newpost_answer,
-			orders.newpost_backorder_answer 		as newpost_backorder_answer,
-			orders.newpost_last_update 				as newpost_last_update,
-			orders.newpost_last_backorder_update 	as newpost_last_backorder_update,
-			orders.status_step1 					as status_step1,
-			orders.status_step2 					as status_step2,
-			orders.status_step3 					as status_step3,
-			statuses1.name 							as status_step1_name,
-			statuses1.act 							as status_step1_act,
-			statuses1.domClass 						as status_step1_domClass,
-			COALESCE(
-				statuses1.row_domClass, 
-				statuses2.row_domClass, 
-				statuses3.row_domClass
-			) 										as status_rowClass,
-			statuses2.name 							as status_step2_name,
-			statuses2.act 							as status_step2_act,
-			statuses2.domClass 						as status_step2_domClass,
-			statuses3.name 							as status_step3_name,
-			statuses3.act 							as status_step3_act,
-			statuses3.domClass 						as status_step3_domClass,
-			COALESCE(
-				statuses3.priority, 
-				statuses2.priority, 
-				statuses1.priority
-			) 										as status_priority,
-			owner.email 							as owner_email,
-			owner.username 							as owner_username,
-			owner.phone 							as owner_phone,
-			owner.newpost_api 						as newpost_api,
-			oper.username 							as oper_username,
-			IF(editor.id = :user_id, 1, 0) 			as editor_ord,
-			editor.username 						as editor_username,
-			TIMESTAMPDIFF(
-				MINUTE, 
-				orders.inwork_time, 
-				NOW()
-			)										as editor_time "
-		. $data_scheme .
-
-		($_SESSION['user']['group_id'] == 2 ? 
-
-		// Текущий пользователь - предприниматель		
-		"	WHERE " 
-			. $history_order_filter
-
-				."	orders.status_step1 = statuses1.id AND
-				orders.status_step2 = statuses2.id AND
-				orders.status_step3 = statuses3.id AND
-
-				(:status_id IS NULL OR :status_id = '0' OR orders.status_step1 = :status_id OR orders.status_step2 = :status_id OR orders.status_step3 = :status_id) AND
-				(:order_date IS NULL OR :order_date = '' OR DATE(orders.created_at) >= :order_date) AND
-				(:order_date_end IS NULL OR :order_date_end = '' OR DATE(orders.created_at) <= :order_date_end) AND
-				(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id)) AND
-				owner.id = orders.owner_id AND
-				(:seller_id = '0' OR owner.id = :seller_id) AND
-				owner.id IN 
-
-				(
-					SELECT subseller_id 
-					FROM sellers_for_sellers 
-					WHERE sellers_for_sellers.seller_id = :user_id)" 
-
-					. (
-						($_GET['count_days'] and $_GET['count_days'] == 2) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . ( 
-						($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
-						($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = '" . strip_phone($_GET['search_text']) . "' " : "") . ( 
-						($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND (orders.newpost_id = '" . $_GET['search_text'] . "' OR orders.newpost_backorder = '" . $_GET['search_text'] . "') " : "") . 
-						$fio_search .  
-						$order_id_search 
-
-					. "	GROUP BY orders.id ORDER BY " :
-
-		// Текущий пользователь - оператор
-		"	WHERE " 
-			. $history_order_filter
-
-					."
+		$query = " 
+				SELECT SQL_CALC_FOUND_ROWS
+					COALESCE((orders.alert_at <= NOW()),0) as 'alert',
+					orders.id as id,
+					orders.created_at as created_at,
+					orders.updated_at as updated_at,
+					orders.alert_at as alert_at,
+					COALESCE(item.name, orders.item) as item,
+					orders.item_price as item_price,
+					orders.item_count as item_count,
+					orders.item_params as item_params,
+					orders.city_area as city_area,
+					orders.address as address,
+					orders.referrer as referrer,
+					orders.request as request,
+					orders.ip_src as ip_src,
+					warehouses.cityRu as np_city_area,
+					warehouses.addressRu as np_address,
+					orders.fio as fio,
+					orders.phone as phone,
+					orders.comment as comment,
+					orders.comment2 as comment2,
+					orders.email as email,
+					orders.whs_ref as whs_ref,
+					orders.newpost_id as newpost_id,
+					orders.newpost_backorder as newpost_backorder,
+					orders.newpost_answer as newpost_answer,
+					orders.newpost_backorder_answer as newpost_backorder_answer,
+					orders.newpost_last_update as newpost_last_update,
+					orders.newpost_last_backorder_update as newpost_last_backorder_update,
+					orders.status_step1 as status_step1,
+					orders.status_step2 as status_step2,
+					orders.status_step3 as status_step3,
+					statuses1.name as status_step1_name,
+					statuses1.act as status_step1_act,
+					statuses1.domClass as status_step1_domClass,
+					COALESCE(statuses1.row_domClass, statuses2.row_domClass, statuses3.row_domClass) as status_rowClass,
+					statuses2.name as status_step2_name,
+					statuses2.act as status_step2_act,
+					statuses2.domClass as status_step2_domClass,
+					statuses3.name as status_step3_name,
+					statuses3.act as status_step3_act,
+					statuses3.domClass as status_step3_domClass,
+					COALESCE(statuses3.priority, statuses2.priority, statuses1.priority) as status_priority,
+					owner.email as owner_email,
+					owner.username as owner_username,
+					owner.phone as owner_phone,
+					owner.newpost_api as newpost_api,
+					oper.username as oper_username,
+					IF(editor.id = :user_id,1,0) as editor_ord,
+					editor.username as editor_username,
+					TIMESTAMPDIFF(MINUTE, orders.inwork_time, NOW()) as editor_time"					
+			.($_SESSION['user']['group_id'] == 2 ? 
+			"   FROM statuses as statuses1, statuses as statuses2, statuses as statuses3, users as owner, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
+					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id " . (
+					($_GET['count_days'] and $_GET['count_days'] > 2) ? " 
+					LEFT JOIN (select order_id, date as send_time, activity from orders_audit) as send_times ON orders.id = send_times.order_id " : "") . "
+				WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
+						 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
+						 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
+						"(orders.status_step1 = 0 OR orders.status_step1 > 50) AND
+						 (orders.status_step2 = 0 OR orders.status_step2 > 50) AND
+						 (orders.status_step3 = 0 OR orders.status_step3 > 50) AND")."
+					orders.status_step1 = statuses1.id AND
+					orders.status_step2 = statuses2.id AND
+					orders.status_step3 = statuses3.id AND
+					(:status_id IS NULL OR :status_id = '0' OR orders.status_step1 = :status_id OR orders.status_step2 = :status_id OR orders.status_step3 = :status_id) AND
+					(:order_date IS NULL OR :order_date = '' OR DATE(orders.created_at) >= :order_date) AND
+					(:order_date_end IS NULL OR :order_date_end = '' OR DATE(orders.created_at) <= :order_date_end) AND
+					(:item_id IS NULL OR :item_id = '0' OR orders.item_id = :item_id OR orders.item IN (SELECT name FROM item WHERE uuid = :item_id)) AND
+					owner.id = orders.owner_id AND
+					(:seller_id = '0' OR owner.id = :seller_id) AND
+					owner.id IN (SELECT subseller_id FROM sellers_for_sellers WHERE sellers_for_sellers.seller_id = :user_id)" . (
+					($_GET['count_days'] and $_GET['count_days'] == 2) ? " AND max_times.max_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . ( 
+					($_GET['count_days'] and $_GET['count_days'] >2) ? " AND send_times.activity like '%Уведомили об отправке%' AND  send_times.send_time <= DATE_SUB(NOW(), INTERVAL " . $_GET['count_days'] . " DAY) " : "") . (
+					($_GET['search_key'] and $_GET['search_key'] == 1 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(orders.phone,'(',''),')',''),'.',''),' ',''),'-',''),'+','') = '" . strip_phone($_GET['search_text']) . "' " : "") . ( 
+					($_GET['search_key'] and $_GET['search_key'] == 2 and $_GET['search_text'] and !empty($_GET['search_text'])) ? " AND (orders.newpost_id = '" . $_GET['search_text'] . "' OR orders.newpost_backorder = '" . $_GET['search_text'] . "') " : "") . 
+					$fio_search .  
+					$order_id_search . "
+					GROUP BY orders.id ORDER BY " :
+			"   FROM statuses as statuses1,statuses as statuses2, statuses as statuses3, users as owner, operators_for_sellers, orders LEFT OUTER JOIN warehouses ON orders.whs_ref = warehouses.ref LEFT OUTER JOIN item ON item.uuid = orders.item_id AND item.owner_id = orders.owner_id LEFT OUTER JOIN users as oper ON oper_id = oper.id LEFT OUTER JOIN users as editor ON editor.id = orders.inwork_userid 
+					LEFT JOIN (select order_id, max(date) as max_time from orders_audit group by order_id) as max_times ON orders.id = max_times.order_id " . (
+					($_GET['count_days'] and $_GET['count_days'] > 2) ? " 
+					LEFT JOIN (select order_id, date as send_time, activity from orders_audit) as send_times ON orders.id = send_times.order_id " : "") . " 
+				WHERE".($_GET['archive'] ? "((orders.status_step1 > 0 AND orders.status_step1 <= 50) OR
+						 (orders.status_step2 > 0 AND orders.status_step2 < 50) OR
+						 (orders.status_step3 > 0 AND orders.status_step3 < 50)) AND" :
+						"(orders.status_step1 = 0 OR orders.status_step1 > 50) AND
+						 (orders.status_step2 = 0 OR orders.status_step2 > 50) AND
+						 (orders.status_step3 = 0 OR orders.status_step3 > 50) AND")."
 					orders.status_step1 = statuses1.id AND
 					orders.status_step2 = statuses2.id AND
 					orders.status_step3 = statuses3.id AND
@@ -543,11 +472,11 @@
 	if ($_GET['status_id']) {$loc .= '&status_id='.$_GET['status_id'];}
 	if ($_GET['order_date']) {$loc .= '&order_date='.$_GET['order_date'];}	
 	if ($_GET['order_date_end']) {$loc .= '&order_date_end='.$_GET['order_date_end'];}	
-
+	
 	//  =================================================================================================================
 	//  Запрос в сервис http://sms-fly.com/ (начало)
 	//  =================================================================================================================
-	
+
 	$myXML 	 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 	$myXML 	.= "<request>";
 	$myXML 	.= "<operation>GETBALANCE</operation>";
@@ -608,8 +537,7 @@
 	//  =================================================================================================================
 		if ($xml_error) { echo '<div class="btn-danger">' . $balance_msg . '</div>'; }
 		else if ($balance_msg != null and $balance_msg < 20) { echo '<div class="btn-danger">Внимание! На счету SMS-fly осталось: ' . $balance_msg .' грн</div>'; } 
-	?>
-	<?php
+	?>	<?php
 		$q_np = 'SELECT TIMESTAMPDIFF(MINUTE , MAX( newpost_last_update ),  NOW() ) as tdf FROM  `orders`';
 		try{ 
 			$stmt = $db->prepare($q_np); 
