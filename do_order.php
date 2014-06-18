@@ -156,6 +156,40 @@
 		$mail_headers = "From: Интернет-магазин <no-reply@goodthing.in.ua>\r\nReply-To: ".$owner['email']."\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=utf-8\r\n";
 		mail($_POST['email'], $mail_subject, $mail_template, $mail_headers);
 	}
+
+    if ($owner[id] == 82) {
+
+$template = '<h3 style="text-align: center;">Здравствуйте!<br />Вам поступил заказ №{order}! <br />Заказчик: {name}</h3>
+<p>&nbsp;</p>
+<p>Заказали <strong>{item} (параметры: {param}) - цена: {price} - количество: {col}<br /><br /></strong>Телефон заказчика: {tel}, <br />email: {email}, <br />адрес: {adress}</p>';
+
+    $mail_template = 
+        str_replace("{surname}",$_POST['fam'],
+            str_replace("{name}",$_POST['fam'].' '.$_POST['name'],
+                str_replace("{order}",$_POST['user_id'],
+                    str_replace("{price}",number_format(floatval($sel_item['price'])*intval($_POST['count'] ? $_POST['count'] : 1),2,'.',''),
+                        str_replace("{param}", ($_POST['param1'] ? $sel_item['param1_name'].':'.$_POST['param1'] : '').($_POST['param2'] ? ' '.$sel_item['param2_name'].':'.$_POST['param2'] : ''),
+                            str_replace("{col}",$_POST['count'] ? $_POST['count'] : 1,
+                                str_replace("{tel}",$_POST['phone'],
+                                    str_replace("{email}",$_POST['email'],
+                                        str_replace("{adress}",$_POST['address'],
+                                            str_replace("{item}",$sel_item['name'],$template)
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        );
+
+        if ($sel_item['mail_subject'] AND $sel_item['mail_template']) {
+            $mail_headers = 'From: Интернет-магазин <no-reply@goodthing.in.ua>'."\r\n".'Reply-To: '.$owner['email']."\r\n"."MIME-Version: 1.0\r\nContent-Type: text/html; charset=utf-8\r\n";
+
+            mail($owner['email'], $mail_subject, $mail_template, $mail_headers);
+        }
+    }
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

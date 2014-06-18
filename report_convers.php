@@ -14,7 +14,7 @@ if (empty($_SESSION['user']) || $_SESSION['user']['active'] == 0 || $_SESSION['u
 
 $dstart = new DateTime($_GET['order_date']);
 $dend = new DateTime((!$_GET['order_date_end'] or $_GET['order_date_end'] == '') ? $_GET['order_date'] : $_GET['order_date_end']);	
-if ($selected_seller AND $selected_seller != '0') {
+if ($_GET['seller_id'] AND $_GET['seller_id'] != '0') {
 	$query = " 
 				SELECT *
 				FROM users
@@ -22,7 +22,7 @@ if ($selected_seller AND $selected_seller != '0') {
 					id = :user_id
 			";		
 		$query_params = array( 
-			':user_id' => $selected_seller
+			':user_id' => $_GET['seller_id']
 		); 
 			 
 	try{ 
@@ -57,7 +57,7 @@ if (isset($_GET['item_id']) && $_GET['item_id']){
     $query_param[':item_id'] = $_GET['item_id'];
 }
 $preorder = false;
-if (isset($selected_seller) && $selected_seller){
+if (isset($_GET['seller_id']) && $_GET['seller_id']){
     $preorder = ' select count(preorder.item_uuid) click from item join preorder on item.uuid = preorder.item_uuid where item.owner_id = :seller_id '.$and_where;
     if ((strlen($where) > 1)){
         $where .= ' and owner_id = :seller_id ';
@@ -72,7 +72,7 @@ if (isset($selected_seller) && $selected_seller){
 //        $preorder = ' select count(preorder.item_uuid) click from item join preorder on item.uuid = preorder.item_uuid where item.owner_id = :seller_id';
 //    }
 
-    $query_param[':seller_id'] = $selected_seller;
+    $query_param[':seller_id'] = $_GET['seller_id'];
 }
 
 //выбор товаров

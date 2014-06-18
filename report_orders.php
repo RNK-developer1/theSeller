@@ -24,7 +24,7 @@
 				(:seller_id = '0' OR owner.id = :seller_id)
 		";		
 	$query_params = array( 
-			':seller_id' => $selected_seller || (!$selected_seller && $selected_seller=='0') ? $selected_seller : $_SESSION['user']['id'],
+			':seller_id' => $_GET['seller_id'] || (!$_GET['seller_id'] && $_GET['seller_id']=='0') ? $_GET['seller_id'] : $_SESSION['user']['id'],
 		);		
 			 
 	try{ 
@@ -157,7 +157,7 @@ function drawChart() {
 				
 		$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $_GET['order_date'],
 				':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date']
@@ -202,7 +202,7 @@ function drawChart() {
      		
 			$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $dstart->format('Y-m-d'),
 			); 
@@ -313,7 +313,7 @@ function drawChart() {
 					(:seller_id = '0' OR owner.id = :seller_id)";
 			$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $dstart->format('Y-m-d'),
 			); 
@@ -337,7 +337,7 @@ function drawChart() {
 			
 			$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $dstart->format('Y-m-d'),
 			); 
@@ -533,7 +533,7 @@ function drawChart() {
 					(:seller_id = '0' OR owner.id = :seller_id)";
 			$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $dstart->format('Y-m-d'),
 			); 
@@ -557,7 +557,7 @@ function drawChart() {
 			
 			$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $dstart->format('Y-m-d'),
 			); 
@@ -774,7 +774,7 @@ if($cur_day == $day_in_month){
 
 		$query_params = array( 
 				':item_id' => $_GET['item_id'],
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $_GET['order_date'],
 				':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date']
@@ -964,7 +964,7 @@ if (!$_GET['item_id']) {
 				GROUP BY item_name, owner.username ORDER BY orders_count DESC";		
 				
 		$query_params = array( 
-				':seller_id' => $selected_seller,
+				':seller_id' => $_GET['seller_id'],
 				':status_id' => $_GET['status_id'],
 				':order_date' => $_GET['order_date'],
 				':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date']
@@ -991,8 +991,8 @@ if (!$_GET['item_id']) {
 		<?php if ($_GET['archive']) { ?>
 			<input type='hidden' name='archive' value='<?php echo $_GET['archive']?>'>
 		<?php } ?>
-		<?php if ($selected_seller or $selected_seller == '0') { ?>
-			<input type='hidden' name='seller_id' value='<?php echo $selected_seller?>'>
+		<?php if ($_GET['seller_id'] or $_GET['seller_id'] == '0') { ?>
+			<input type='hidden' name='seller_id' value='<?php echo $_GET['seller_id']?>'>
 		<?php }
 			if ($_GET['item_id'] or $_GET['item_id'] == '0') { ?>
 			<input type='hidden' name='item_id' value='<?php echo $_GET['item_id']?>'>
