@@ -218,30 +218,45 @@
                     <td><?php echo $client['email'] ?></td>
 
 <?php
+    $vk_error = false;
     $vk_id = $client['vk_url'];
     $pattern = '/id=([0-9]+)/';
-    if (preg_match($pattern, $vk_id, $matches))
+    if (preg_match($pattern, $vk_id, $matches)) {
         $vk_id = 'id' . $matches[1];
+    }
     $pattern = '/im\?.*sel=([a-zA-Z0-9_]+)/';
-    if (preg_match($pattern, $vk_id, $matches))
+    if (preg_match($pattern, $vk_id, $matches)) {
         $vk_id = 'id' . $matches[1];
+    }
     $pattern = '/(id[0-9]+)/';
-    if (preg_match($pattern, $vk_id, $matches))
+    if (preg_match($pattern, $vk_id, $matches)) {
         $vk_id = $matches[0];
+    }
     $pattern_away = '/(vk.com\/away)/';
     $pattern_feed = '/(vk.com\/feed)/';
     $pattern_app = '/(vk.com\/app)/';
-    //$pattern_vk = '/(vk.com\/vk)/';
-    //$pattern_im = '/(vk.com\/im)/';
-    if ((!preg_match($pattern_app, $vk_id, $matches)) and
+    $pattern_friends = '/(vk.com\/friends)/';
+    $pattern_login = '/(vk.com\/login)/';
+    $pattern_settings = '/(vk.com\/settings)/';
+    $pattern_vk = '/(vk.com\/vk)/';
+    $pattern_im = '/(vk.com\/im)/';
+    if (
+        //(!preg_match($pattern_app, $vk_id, $matches)) and
+        (!preg_match($pattern_friends, $vk_id, $matches)) and
+        (!preg_match($pattern_settings, $vk_id, $matches)) and
+        (!preg_match($pattern_login, $vk_id, $matches)) and
         (!preg_match($pattern_feed, $vk_id, $matches)) and
         //(!preg_match($pattern_im, $vk_id, $matches)) and
         //(!preg_match($pattern_vk, $vk_id, $matches)) and
         (!preg_match($pattern_away, $vk_id, $matches))) {
         $pattern = '/vk.com\/([a-zA-Z0-9_]+)/';
-        if (preg_match($pattern, $vk_id, $matches))
+        if (preg_match($pattern, $vk_id, $matches)) {
             $vk_id = $matches[1];
-    } else $vk_id = 'Некорректные данные о профиле ВКонтакте ('. $vk_id .')';
+        }
+    } else {
+        $vk_id = 'Некорректные данные о профиле ВКонтакте ('. $vk_id .')';
+        $vk_error = true;
+    }
 ?>
 
                     <td><?php echo $vk_id ?></td>
