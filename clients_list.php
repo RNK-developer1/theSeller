@@ -10,13 +10,13 @@
 
     $query = "
     SELECT SQL_CALC_FOUND_ROWS fio, phone, email,
-        IF (referrer LIKE '%vk.com%', referrer, 'нет данных') AS vk_url
+        IF (referrer LIKE '%vk.com%', referrer, '') AS vk_url
     FROM orders
     WHERE fio IS NOT NULL AND fio <> ''
         AND owner_id = :seller_id " .
         (($_GET['item_id']) ? " AND item_id = :item_id " : "") .
-        (($_GET['order_date']) ? " AND DATE(orders.created_at) >= :order_date) " : "") .
-        (($_GET['order_date_end']) ? " AND DATE(orders.created_at) <= :order_date_end) " : "") .
+        (($_GET['order_date']) ? " AND DATE(created_at) >= :order_date " : "") .
+        (($_GET['order_date_end']) ? " AND DATE(created_at) <= :order_date_end " : "") .
     " GROUP BY phone
     ORDER BY fio ASC
     LIMIT " . $page_start . ", 500";
@@ -145,6 +145,22 @@
 
     $select_items = $stmt->fetchAll();
     // =============================================================================================
+    //
+    $query = "
+                SELECT
+                    *
+                FROM
+                    statuses
+                WHERE id <> 0
+                ORDER BY id ASC
+            ";
+    try{
+        $stmt = $db->prepare($query);
+        $result = $stmt->execute($query_params);
+    }
+    catch(PDOException $ex){ die("Невозможно выполнить запрос02: " . $ex->getMessage()); }
+
+    $statuses_step1 = $stmt->fetchAll();
 
 ?>
 <!doctype html>
@@ -200,7 +216,35 @@
                     <td><?php echo $client['fio'] ?></td>
                     <td><?php echo $client['phone'] ?></td>
                     <td><?php echo $client['email'] ?></td>
-                    <td><?php echo $client['vk_url'] ?></td>
+
+<?php
+    $vk_id = $client['vk_url'];
+    $pattern = '/id=([0-9]+)/';
+    if (preg_match($pattern, $vk_id, $matches))
+        $vk_id = 'id' . $matches[1];
+    $pattern = '/im\?.*sel=([a-zA-Z0-9_]+)/';
+    if (preg_match($pattern, $vk_id, $matches))
+        $vk_id = 'id' . $matches[1];
+    $pattern = '/(id[0-9]+)/';
+    if (preg_match($pattern, $vk_id, $matches))
+        $vk_id = $matches[0];
+    $pattern_away = '/(vk.com\/away)/';
+    $pattern_feed = '/(vk.com\/feed)/';
+    $pattern_app = '/(vk.com\/app)/';
+    //$pattern_vk = '/(vk.com\/vk)/';
+    //$pattern_im = '/(vk.com\/im)/';
+    if ((!preg_match($pattern_app, $vk_id, $matches)) and
+        (!preg_match($pattern_feed, $vk_id, $matches)) and
+        //(!preg_match($pattern_im, $vk_id, $matches)) and
+        //(!preg_match($pattern_vk, $vk_id, $matches)) and
+        (!preg_match($pattern_away, $vk_id, $matches))) {
+        $pattern = '/vk.com\/([a-zA-Z0-9_]+)/';
+        if (preg_match($pattern, $vk_id, $matches))
+            $vk_id = $matches[1];
+    } else $vk_id = 'Некорректные данные о профиле ВКонтакте ('. $vk_id .')';
+?>
+
+                    <td><?php echo $vk_id ?></td>
                 </tr>
     <?php   } ?>
     </table>
