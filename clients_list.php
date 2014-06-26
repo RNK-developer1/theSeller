@@ -9,10 +9,15 @@
     $page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
 
     $query = "
-    SELECT SQL_CALC_FOUND_ROWS fio, phone, email
+    SELECT SQL_CALC_FOUND_ROWS fio, phone, email,
+        IF (referrer LIKE '%vk.com%', referrer, 'нет данных') AS vk_url
     FROM orders
-    WHERE fio IS NOT NULL AND fio <> '' AND owner_id = :seller_id
-    GROUP BY phone
+    WHERE fio IS NOT NULL AND fio <> ''
+        AND owner_id = :seller_id " .
+        (($_GET['item_id']) ? " AND item_id = :item_id " : "") .
+        (($_GET['order_date']) ? " AND DATE(orders.created_at) >= :order_date) " : "") .
+        (($_GET['order_date_end']) ? " AND DATE(orders.created_at) <= :order_date_end) " : "") .
+    " GROUP BY phone
     ORDER BY fio ASC
     LIMIT " . $page_start . ", 500";
 //echo $query;
@@ -20,10 +25,15 @@
         array(
             //':user_id' => $_SESSION['user']['id'],
             ':seller_id' => (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']),
-            //':item_id' => $_GET['item_id'],
-            //':order_date' => $_GET['order_date'],
-            //':order_date_end' => $_GET['order_date_end'] ? $_GET['order_date_end'] : $_GET['order_date']
         );
+    if ($_GET['item_id']) {
+        $query_params[':item_id'] = $_GET['item_id'];
+    }
+    if ($_GET['order_date']) {
+        $query_params[':order_date'] = $_GET['order_date'];
+        if ($_GET['order_date_end']) $query_params[':order_date_end'] = $_GET['order_date_end'];
+        else $query_params['order_date_end'] = $_GET['order_date'];
+    }
 //var_dump($query_params);
     try {
         $stmt = $db->prepare($query);
@@ -190,7 +200,7 @@
                     <td><?php echo $client['fio'] ?></td>
                     <td><?php echo $client['phone'] ?></td>
                     <td><?php echo $client['email'] ?></td>
-                    <td><?php echo 'TBD' ?></td>
+                    <td><?php echo $client['vk_url'] ?></td>
                 </tr>
     <?php   } ?>
     </table>

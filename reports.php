@@ -1,15 +1,15 @@
 <?php
-	require("config.php"); 	
+	require("config.php");
 
 	$order_count = array();
 	$max_cnt = NULL;
 	$tbl = '';
-	
+
 	if (empty($_SESSION['user']) || $_SESSION['user']['active'] == 0 || $_SESSION['user']['group_id'] != 2) {
-		header("Location: index.php"); 
-		die("Перенаправление: index.php"); 
+		header("Location: index.php");
+		die("Перенаправление: index.php");
 	}
-?>	
+?>
 
 <!doctype html>
 <html lang="ru">
@@ -32,6 +32,7 @@
 	<p><a class="btn btn-default" href="report_unpaid_sent.php?seller_id=0">Отчёт по неоплаченным отправленным</a></p>
     <p><a href='report_list_sent_goods.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчет по отправленным товарам</a></p>
 	<p><a href='report_convers.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php echo date("Y-m-d", strtotime('last month')).'&order_date_end='.date("Y-m-d", strtotime('last month + 30 day')); ?>' class='btn btn-default'>Конверсия</a></p>
+    <p><a href="clients_list.php?seller_id=<?php echo $_SESSION['user']['id']?>" class='btn btn-default'>Клиенты</a></p>
 </div>
 </body>
 </html>
