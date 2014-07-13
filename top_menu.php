@@ -6,6 +6,9 @@
 	$filter_orders = array(
 		'orders_list.php',
 	);
+    $filter_clients = array(
+        'clients_list.php',
+    );
 ?>
 <div class="navbar navbar-fixed-top">
   <div class="container">
@@ -128,6 +131,9 @@
 									<?php } ?>
 								</div>
 								<a class="btn btn-default" href="javascript:window.location.reload();">Обновить</a>
+                                <?php if (in_array($php_script_name, $filter_clients)) { ?>
+                                <a class="btn btn-default" href="/theseller/clients_list_csv.php">Экспорт в csv</a>
+                                <?php } ?>
 							</form>
 						</li>
 					</ul>
