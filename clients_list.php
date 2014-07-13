@@ -241,11 +241,11 @@
                 <tr id='client'>
                     <td><?php echo $client_number++ ?></td>
 <?php
-    echo (!$seller_id?'<td>'.$client['seller_name'].'</td>':'');
+    echo (!$seller_id?'<td>'.trim($client['seller_name']).'</td>':'');
 ?>
-                    <td><?php echo $client['fio'] ?></td>
-                    <td><?php echo $client['phone'] ?></td>
-                    <td><?php echo ($client['email'])?'<a href="mailto:'.$client['email'].'">'.$client['email'].'</a>':'' ?></td>
+                    <td><?php echo trim($client['fio']) ?></td>
+                    <td><?php echo trim($client['phone']) ?></td>
+                    <td><?php echo ($client['email'])?'<a href="mailto:'.trim($client['email']).'">'.trim($client['email']).'</a>':'' ?></td>
 
 
 <?php
@@ -301,7 +301,7 @@
     if (!empty($client['date_create']))
         $date_create = explode('; ', $client['date_create']);
     for ($i=0;$i<sizeof($good);$i++)
-        echo $date_create[$i] . ', ' . $good[$i] . '<br/>';
+        echo trim($date_create[$i]) . ', ' . trim($good[$i]) . '<br/>';
 
 
                     ?></td>
