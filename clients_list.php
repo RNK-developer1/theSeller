@@ -6,25 +6,35 @@
         die("Перенаправление: index.php");
     }
 
+    $seller_id = (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']);
+    $seller_username = "none";
+    $period =
+        ($_GET['order_date']? ' Период расчета: с ' . $_GET['order_date'] . ' по ' .
+            ($_GET['order_date_end']? $_GET['order_date_end'] : $_GET['order_date']):'');
+
     $page_start = 500*($_GET['page'] ? $_GET['page']-1 : 0);
 
     $query = "
-    SELECT SQL_CALC_FOUND_ROWS fio, phone, email,
-        IF (referrer LIKE '%vk.com%', referrer, '') AS vk_url
+    SELECT SQL_CALC_FOUND_ROWS orders.fio, orders.phone, orders.email,
+        IF (orders.referrer LIKE '%vk.com%', referrer, '') AS vk_url,
+        users.username as seller_name,
+        GROUP_CONCAT(orders.item SEPARATOR '; ') as good,
+        GROUP_CONCAT(DATE(orders.created_at) SEPARATOR '; ') as date_create
     FROM orders
-    WHERE fio IS NOT NULL AND fio <> ''
-        AND owner_id = :seller_id " .
-        (($_GET['item_id']) ? " AND item_id = :item_id " : "") .
-        (($_GET['order_date']) ? " AND DATE(created_at) >= :order_date " : "") .
-        (($_GET['order_date_end']) ? " AND DATE(created_at) <= :order_date_end " : "") .
-    " GROUP BY phone
-    ORDER BY fio ASC
+        LEFT JOIN users ON orders.owner_id = users.id
+    WHERE fio IS NOT NULL AND fio <> '' ".
+        (($_GET['seller_id'] or $_GET['seller_id'] != '0') ?"AND orders.owner_id = :seller_id ":"") .
+        (($_GET['item_id']) ? " AND orders.item_id = :item_id " : "") .
+        (($_GET['order_date']) ? " AND DATE(orders.created_at) >= :order_date " : "") .
+        (($_GET['order_date_end']) ? " AND DATE(orders.created_at) <= :order_date_end " : "") .
+    " GROUP BY orders.phone
+    ORDER BY orders.fio ASC
     LIMIT " . $page_start . ", 500";
 //echo $query;
     $query_params =
         array(
             //':user_id' => $_SESSION['user']['id'],
-            ':seller_id' => (($_GET['seller_id'] or $_GET['seller_id'] == '0') ? $_GET['seller_id'] : $_SESSION['user']['id']),
+            ':seller_id' => $seller_id,
         );
     if ($_GET['item_id']) {
         $query_params[':item_id'] = $_GET['item_id'];
@@ -103,6 +113,12 @@
 
         $select_sellers = $stmt->fetchAll();
     }
+    foreach ($select_sellers as $seller) {
+        //print_r($seller);
+        if ($seller['id'] == $seller_id)
+            $seller_username = trim(str_replace ("-", "", $seller['username']));
+    }
+    //print_r($select_sellers); exit();
     // =============================================================================================
 
     // =============================================================================================
@@ -186,7 +202,10 @@
     }
 ?>
 <div class="container">
-    <h3>Список клиентов<?php echo ', показано '.count($clients).' из '.$clients_full_count['cnt'];?></h3>
+    <h3><?php echo 'Список клиентов, показано ' .
+        count($clients) . ' из ' . $clients_full_count['cnt'] .
+        ($seller_id?'. Предприниматель: ' . $seller_username . '.':'') .
+        (!empty($period)?$period:'' );?></h3>
     <?php
         if ($clients_full_count['cnt'] > count($orders)) {
             echo '<h3>Страницы:';
@@ -205,17 +224,29 @@
     ?>
     <table class='table table-hover table-bordered table-fixed-header'>
         <thead class="header">
+            <th>№</th>
+<?php
+    echo (!$seller_id?'<th>Предприниматель</th>':'');
+?>
             <th>ФИО</th>
             <th>Телефон</th>
             <th>Email</th>
             <th>ID вконтакте</th>
+            <th>Товары</th>
 
         </thead>
-    <?php foreach ($clients as $client){ ?>
+    <?php
+    $client_number = $page_start + 1;
+    foreach ($clients as $client){ ?>
                 <tr id='client'>
+                    <td><?php echo $client_number++ ?></td>
+<?php
+    echo (!$seller_id?'<td>'.$client['seller_name'].'</td>':'');
+?>
                     <td><?php echo $client['fio'] ?></td>
                     <td><?php echo $client['phone'] ?></td>
-                    <td><?php echo $client['email'] ?></td>
+                    <td><?php echo ($client['email'])?'<a href="mailto:'.$client['email'].'">'.$client['email'].'</a>':'' ?></td>
+
 
 <?php
     $vk_error = false;
@@ -227,6 +258,10 @@
     $pattern = '/im\?.*sel=([a-zA-Z0-9_]+)/';
     if (preg_match($pattern, $vk_id, $matches)) {
         $vk_id = 'id' . $matches[1];
+    }
+    $pattern = '/album([0-9]+)/';
+    if (preg_match($pattern, $vk_id, $matches)) {
+        $vk_id = $matches[1];
     }
     $pattern = '/(id[0-9]+)/';
     if (preg_match($pattern, $vk_id, $matches)) {
@@ -241,25 +276,35 @@
     $pattern_vk = '/(vk.com\/vk)/';
     $pattern_im = '/(vk.com\/im)/';
     if (
-        //(!preg_match($pattern_app, $vk_id, $matches)) and
+        (!preg_match($pattern_app, $vk_id, $matches)) and
         (!preg_match($pattern_friends, $vk_id, $matches)) and
         (!preg_match($pattern_settings, $vk_id, $matches)) and
         (!preg_match($pattern_login, $vk_id, $matches)) and
         (!preg_match($pattern_feed, $vk_id, $matches)) and
         //(!preg_match($pattern_im, $vk_id, $matches)) and
-        //(!preg_match($pattern_vk, $vk_id, $matches)) and
+        (!preg_match($pattern_vk, $vk_id, $matches)) and
         (!preg_match($pattern_away, $vk_id, $matches))) {
         $pattern = '/vk.com\/([a-zA-Z0-9_]+)/';
         if (preg_match($pattern, $vk_id, $matches)) {
             $vk_id = $matches[1];
         }
     } else {
-        $vk_id = 'Некорректные данные о профиле ВКонтакте ('. $vk_id .')';
+        $vk_id = 'Некорректные данные<br/> о профиле ВКонтакте ';//('. $vk_id .')';
         $vk_error = true;
     }
 ?>
 
-                    <td><?php echo $vk_id ?></td>
+                    <td><?php echo ($vk_error)?$vk_id:'<a href="http://vk.com/'.$vk_id.'">'.$vk_id.'</a>' ?></td>
+                    <td><?php
+    if (!empty($client['good']))
+        $good = explode('; ', $client['good']);
+    if (!empty($client['date_create']))
+        $date_create = explode('; ', $client['date_create']);
+    for ($i=0;$i<sizeof($good);$i++)
+        echo $date_create[$i] . ', ' . $good[$i] . '<br/>';
+
+
+                    ?></td>
                 </tr>
     <?php   } ?>
     </table>
