@@ -1,5 +1,5 @@
 <?php
-	$url = $_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]; 
+	$url = $_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
 	$url_array = (parse_url($url));
 	$path_parts = pathinfo($url_array['path']);
 	$php_script_name = $path_parts['basename'];
@@ -24,16 +24,18 @@
 						<p><a href='profile.php' class='btn btn-default'>Профиль пользователя</a></p>
 						<p><a href='reg_requests.php' class='btn btn-default'>Заявки на регистрацию</a></p>
 						<p><a href='reg_list.php' class='btn btn-default'>Подчиненные</a></p>
-						<p><a href='items_list.php' class='btn btn-default'>Справочник товаров</a></p>		
-						<p><a href='reports.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчеты</a></p>								
+						<p><a href='items_list.php' class='btn btn-default'>Справочник товаров</a></p>
+						<p><a href='reports.php?seller_id=<?php echo $_SESSION['user']['id']?>&order_date=<?php $cdt = new DateTime(); echo($cdt->format('Y-m-d'));?>' class='btn btn-default'>Отчеты</a></p>
 						<p><a href='orders_list.php' class='btn btn-default'>Текущие заказы</a></p>
 						<p><a href='orders_list.php?archive=1' class='btn btn-default'>Архив заказов</a></p>
 						<p><a href='preorders_list.php' class='btn btn-default'>Посещения</a></p>
-					<?php } else if (!empty($_SESSION['user']) and $_SESSION['user']['group_id'] == 1) { ?> 
+                        <p><a href='clients_list.php' class='btn btn-default'>Клиенты</a></p>
+					<?php } else if (!empty($_SESSION['user']) and $_SESSION['user']['group_id'] == 1) { ?>
 						<p><a href='profile.php' class='btn btn-default'>Профиль пользователя</a></p>
 						<p><a href='orders_list.php?seller_id=0&oper=1' class='btn btn-default'>Текущие заказы</a></p>
 						<p><a href='orders_list.php?seller_id=0&archive=1' class='btn btn-default'>Архив заказов</a></p>
 						<p><a href='preorders_list.php?seller_id=0' class='btn btn-default'>Посещения</a></p>
+                        <p><a href='clients_list.php?seller_id=0' class='btn btn-default'>Клиенты</a></p>
 					<?php } ?>
 				</ul>
 			</li>
@@ -45,14 +47,14 @@
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Войти <b class="caret"></b></a>
 					<ul class="dropdown-menu" style="padding: 20px">
-					<form action="index.php" method="post"> 
-						Email:<br /> 
-						<input type="text" name="email" value="<?php echo $submitted_email; ?>" /> 
-						<br /><br /> 
-						Пароль:<br /> 
-						<input type="password" name="password" value="" /> 
-						<br /><br /> 
-						<input type="submit" class="btn btn-default" value="Войти" /> 
+					<form action="index.php" method="post">
+						Email:<br />
+						<input type="text" name="email" value="<?php echo $submitted_email; ?>" />
+						<br /><br />
+						Пароль:<br />
+						<input type="password" name="password" value="" />
+						<br /><br />
+						<input type="submit" class="btn btn-default" value="Войти" />
 					</form>
 					</ul>
 				</li>
@@ -60,8 +62,8 @@
 			<ul class="nav navbar-nav pull-right">
 				<li><a href="register.php" class="pull-right">Зарегистрироваться</a></li>
 			</ul>
-		<?php } else { 
-					if ($select_sellers OR $select_items) { ?>					
+		<?php } else {
+					if ($select_sellers OR $select_items) { ?>
 					<ul class="nav navbar-nav">
 						<li>
 							<form class="form-inline" role="form">
@@ -81,14 +83,14 @@
 									<input type='hidden' name='order_date_end' value='<?php echo $_GET['order_date_end']?>'>
 								<?php } ?>
 								<?php if ($_SESSION['user']['group_id'] == 1) { ?>
-									<div class="form-group">	
+									<div class="form-group">
 										<select name="oper" class="form-control" id="oper" style="max-width: 80px" onchange="$(this).closest('form').trigger('submit');">
 											<option value='0' <?php echo (!$_GET['oper'] OR $_GET['oper'] == '0') ? 'selected=selected' : ''?>>Все</option>
 											<option value='1' <?php echo ($_GET['oper'] == '1') ? 'selected=selected' : ''?>>Мои</option>
-											<option value='2' <?php echo ($_GET['oper'] == '2') ? 'selected=selected' : ''?>>Ничьи</option>											
+											<option value='2' <?php echo ($_GET['oper'] == '2') ? 'selected=selected' : ''?>>Ничьи</option>
 										</select>
 									</div>
-								<?php } ?>	
+								<?php } ?>
 								<?php if ($select_sellers) { ?>
 									<div class="form-group">
 										<label for="seller_id">От:</label>
@@ -104,7 +106,7 @@
 										</select>
 									</div>
 								<?php } ?>
-								<div class="form-group">	
+								<div class="form-group">
 									<?php if ((!$_GET['seller_id'] OR $_GET['seller_id'] != '0' OR $_SESSION['user']['group_id']==2) AND $select_items) { ?>
 										<select name="item_id" class="form-control" id="item_id" style="max-width: 180px" onchange="$(this).closest('form').trigger('submit');">
 											<option value='0' <?php echo (!$_GET['item_id'] OR $_GET['item_id'] == '0') ? 'selected=selected' : ''?>>Все товары</option>
@@ -116,7 +118,7 @@
 										</select>
 									<?php } ?>
 								</div>
-								<div class="form-group">	
+								<div class="form-group">
 									<?php if (in_array($php_script_name, $filter_orders)) { ?>
 										<select name="count_days" class="form-control" id="item_id" style="max-width: 180px" onchange="$(this).closest('form').trigger('submit');">
 											<option value='0' <?php echo (!$_GET['count_days'] OR $_GET['count_days'] == '0') ? 'selected=selected' : ''?>>Без фильтра</option>
@@ -124,7 +126,7 @@
 											<option value='3' <?php echo ($_GET['count_days'] == '3') ? 'selected=selected' : ''?>>Отправлены более 3 дней назад</option>";
 											<option value='7' <?php echo ($_GET['count_days'] == '7') ? 'selected=selected' : ''?>>Отправлены более 7 дней назад</option>";										</select>
 									<?php } ?>
-								</div>								
+								</div>
 								<a class="btn btn-default" href="javascript:window.location.reload();">Обновить</a>
 							</form>
 						</li>
@@ -153,13 +155,13 @@
 									<?php } ?>
 									<?php if ($_GET['item_id']) { ?>
 										<input type='hidden' name='item_id' value='<?php echo $_GET['item_id'] ?>'>
-									<?php } ?>								
+									<?php } ?>
 									<div class="form-group">
 										<label for="order_date">Дата заказа (начало периода):</label>
 										<input type='text' class="form-control datepick_ctrl" name='order_date' value='<?php echo $_GET['order_date'] ?>'>
 										<label for="order_date">Конец периода:</label>
 										<input type='text' class="form-control datepick_ctrl" name='order_date_end' value='<?php echo $_GET['order_date_end'] ?>'>
-										<label for="status_id">Статус:</label>									
+										<label for="status_id">Статус:</label>
 										<select name="status_id" class="form-control" id="status_id" style="width:200px">
 											<option value='0' <?php echo (!$_GET['status_id'] OR $_GET['status_id'] == '0') ? 'selected=selected' : ''?>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Все статусы</option>
 											<?php
@@ -185,11 +187,11 @@
 													foreach ($statuses_step3 as $status) {
 														$d = $status['act'] ? ' / ' : '';
 														echo "<option style='".($status_cnts ? $status_cnts[$status['id']] ? '' : 'color: lightgray' : '')."'".($_GET['status_id'] == $status['id'] ? 'selected=selected' : '')." value=".$status['id'].">".($status_cnts ? $status_cnts[$status['id']] ? '('.str_pad($status_cnts[$status['id']], 2, '0', STR_PAD_LEFT).') ' : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;').($status['act']?'3 / ':'').($status['automatic']?'(АВТО) ':'').$status['act'].$d.$status['name']."</option>";
-													}	
-												}													
+													}
+												}
 											?>
-										</select>									
-									</div>					  
+										</select>
+									</div>
 								  <button type="submit" class="btn btn-default">Показать</button>
 								</form>
 							</ul>
@@ -197,7 +199,7 @@
 					</ul>
 				</div>
 			<?php } ?>
-			<?php if (in_array($php_script_name, $filter_orders)) { ?>			
+			<?php if (in_array($php_script_name, $filter_orders)) { ?>
 				<div class="nav-collapse collapse">
 					<ul class="nav navbar-nav pull-right">
 						<li class="dropdown">
@@ -215,19 +217,19 @@
 									<?php } ?>
 									<?php if ($_GET['item_id']) { ?>
 										<input type='hidden' name='item_id' value='<?php echo $_GET['item_id'] ?>'>
-									<?php } ?>								
+									<?php } ?>
 									<div class="form-group">
 										<label for="search_text">Текст для поиска:</label>
 										<input id="search_text" type='text' class="form-control" name="search_text" placeholder="Введите текст..." value='<?php echo ($_GET['search_text'] && ($_GET['search_key'] && $_GET['search_key'] > '0')) ? $_GET['search_text'] : '' ?>' />
-										<label for="search_key">Ключ поиска:</label>									
+										<label for="search_key">Ключ поиска:</label>
 										<select id="search_key" name="search_key" class="form-control" id="search_key" style="width:200px">
 											<option value ='0' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '0') ? 'selected=selected' : ''?>></option>
 											<option value ='1' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '1') ? 'selected=selected' : ''?>>Телефон</option>
 											<option value ='2' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '2') ? 'selected=selected' : ''?>>Номер декларации</option>
 											<option value ='3' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '3') ? 'selected=selected' : ''?>>ФИО покупателя</option>
 											<option value ='4' <?php echo ($_GET['search_key'] && $_GET['search_key'] == '4') ? 'selected=selected' : ''?>>Номер заказа</option>
-										</select>									
-									</div>					  
+										</select>
+									</div>
 								  <button type="submit" class="btn btn-default">Показать</button>
 								  <button id="search_reset" type="reset" value="Reset" class="btn btn-default" >Сбросить</button>
 								</form>
@@ -235,7 +237,7 @@
 						</li>
 					</ul>
 				</div>
-			<?php } ?>	
+			<?php } ?>
 		<?php }?>
     </div>
   </div>
