@@ -60,19 +60,19 @@
 
         $result .= $client_number++ . ";";
         if (!empty($client['seller_name']))
-            $result .= trim($client['seller_name']) . ";";
+            $result .= '"' . trim($client['seller_name']) . '"' . ";";
         else
             $result .= ";";
         if (!empty($client['fio']))
-            $result .= trim($client['fio']) . ";";
+            $result .= '"' . str_replace('"', '""', trim($client['fio'])) . '"' . ";";
         else
             $result .= ";";
         if (!empty($client['phone']))
-            $result .= trim($client['phone']) . ";";
+            $result .= '"' . trim($client['phone']) . '"' . ";";
         else
             $result .= ";";
         if (!empty($client['email']))
-            $result .= trim($client['email']) . ";";
+            $result .= '"' . trim($client['email']) . '"' . ";";
         else
             $result .= ";";
 
@@ -120,7 +120,7 @@
             $vk_error = true;
         }
 
-        if (!empty($client['$vk_id'])) {
+        if (!empty($client['vk_url'])) {
             $result .= $vk_id . ";";
         }
         else
@@ -130,14 +130,18 @@
             $good = explode('; ', $client['good']);
         if (!empty($client['date_create']))
             $date_create = explode('; ', $client['date_create']);
-        $result .= '"';
+        //$result .= '"';
         for ($i=0;$i<sizeof($good);$i++) {
-            // if ($i = 0 )
-            //     $result .= $date_create[$i] . ', ' . $good[$i] . ";";
-            // else
-                $result .= $date_create[$i] . ', ' . $good[$i] . "; ";
+            if ($i==0 && $i!=(sizeof($good)-1))
+                $result .= '"' . $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . "\n";
+            else if ($i==0 && $i==(sizeof($good)-1))
+                $result .= '"' . $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . '"' . "\r\n";
+            else if ($i<(sizeof($good)-1))
+                $result .= $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . "\n";
+            else
+                $result .= $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . '"' . "\r\n";
         }
-        $result .= '"' . "\r\n";
+        //$result .= '"' . "\r\n";
     }
 
     header('Content-Disposition: attachment; filename=clients_list.csv;charset=UTF-8');
