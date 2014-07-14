@@ -17,7 +17,10 @@
         IF (orders.referrer LIKE '%vk.com%', referrer, '') AS vk_url,
         users.username as seller_name,
         GROUP_CONCAT(orders.item SEPARATOR '; ') as good,
-        GROUP_CONCAT(DATE(orders.created_at) SEPARATOR '; ') as date_create
+        GROUP_CONCAT(DATE(orders.created_at) SEPARATOR '; ') as date_create,
+        GROUP_CONCAT(orders.status_step1 SEPARATOR '; ') as status_step1,
+        GROUP_CONCAT(orders.status_step2 SEPARATOR '; ') as status_step2,
+        GROUP_CONCAT(orders.status_step3 SEPARATOR '; ') as status_step3
     FROM orders
         LEFT JOIN users ON orders.owner_id = users.id
     WHERE fio IS NOT NULL AND fio <> '' ".
@@ -130,16 +133,35 @@
             $good = explode('; ', $client['good']);
         if (!empty($client['date_create']))
             $date_create = explode('; ', $client['date_create']);
+        if (!empty($client['status_step1']))
+            $status_step1 = explode('; ', $client['status_step1']);
+        if (!empty($client['status_step2']))
+            $status_step2 = explode('; ', $client['status_step2']);
+        if (!empty($client['status_step3']))
+            $status_step3 = explode('; ', $client['status_step3']);
+
+        $st = "Обрабатывается";
         //$result .= '"';
         for ($i=0;$i<sizeof($good);$i++) {
+
+            if (in_array($status_step3[$i], array(20, 301, 310, 311, 312))) {
+                $st = "Оплачен";
+            } else if (in_array($status_step3[$i], array(30, 31, 32, 302, 310, 318, 320, 321)) or in_array($status_step2[$i], array(220, 225, 240, 241, 242))) {
+                $st = "Возврат";
+            } else if (in_array($status_step1[$i], array(10, 40)) or in_array($status_step2[$i], array(10, 230))) {
+                $st = "Отменен";
+            } else {
+                $st = "Обрабатывается";
+            }
+
             if ($i==0 && $i!=(sizeof($good)-1))
-                $result .= '"' . $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . "\n";
+                $result .= '"' . $date_create[$i] . ' ' . str_replace('"', '""', $good[$i]) . ' - ' . $st . "\n";
             else if ($i==0 && $i==(sizeof($good)-1))
-                $result .= '"' . $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . '"' . "\r\n";
+                $result .= '"' . $date_create[$i] . ' ' . str_replace('"', '""', $good[$i]) . ' - ' . $st . '"' . "\r\n";
             else if ($i<(sizeof($good)-1))
-                $result .= $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . "\n";
+                $result .= $date_create[$i] . ' ' . str_replace('"', '""', $good[$i]) /*. ' - ' . $st*/ . "\n";
             else
-                $result .= $date_create[$i] . ', ' . str_replace('"', '""', $good[$i]) . '"' . "\r\n";
+                $result .= $date_create[$i] . ' ' . str_replace('"', '""', $good[$i]) . ' - ' . $st . '"' . "\r\n";
         }
         //$result .= '"' . "\r\n";
     }

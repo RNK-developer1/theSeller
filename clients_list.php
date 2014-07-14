@@ -19,7 +19,10 @@
         IF (orders.referrer LIKE '%vk.com%', referrer, '') AS vk_url,
         users.username as seller_name,
         GROUP_CONCAT(orders.item SEPARATOR '; ') as good,
-        GROUP_CONCAT(DATE(orders.created_at) SEPARATOR '; ') as date_create
+        GROUP_CONCAT(DATE(orders.created_at) SEPARATOR '; ') as date_create,
+        GROUP_CONCAT(orders.status_step1 SEPARATOR '; ') as status_step1,
+        GROUP_CONCAT(orders.status_step2 SEPARATOR '; ') as status_step2,
+        GROUP_CONCAT(orders.status_step3 SEPARATOR '; ') as status_step3
     FROM orders
         LEFT JOIN users ON orders.owner_id = users.id
     WHERE fio IS NOT NULL AND fio <> '' ".
@@ -296,16 +299,38 @@
 
                     <td><?php echo ($vk_error)?$vk_id:'<a href="http://vk.com/'.$vk_id.'">'.$vk_id.'</a>' ?></td>
                     <td><?php
+
     if (!empty($client['good']))
         $good = explode('; ', $client['good']);
     if (!empty($client['date_create']))
         $date_create = explode('; ', $client['date_create']);
-    for ($i=0;$i<sizeof($good);$i++)
-        echo trim($date_create[$i]) . ', ' . trim($good[$i]) . '<br/>';
+    if (!empty($client['status_step1']))
+        $status_step1 = explode('; ', $client['status_step1']);
+    if (!empty($client['status_step2']))
+        $status_step2 = explode('; ', $client['status_step2']);
+    if (!empty($client['status_step3']))
+        $status_step3 = explode('; ', $client['status_step3']);
 
+    $st = "Обрабатывается";
+
+    for ($i=0;$i<sizeof($good);$i++) {
+
+        if (in_array($status_step3[$i], array(20, 301, 310, 311, 312))) {
+            $st = "Оплачен";
+        } else if (in_array($status_step3[$i], array(30, 31, 32, 302, 310, 318, 320, 321)) or in_array($status_step2[$i], array(220, 225, 240, 241, 242))) {
+            $st = "Возврат";
+        } else if (in_array($status_step1[$i], array(10, 40)) or in_array($status_step2[$i], array(10, 230))) {
+            $st = "Отменен";
+        } else {
+            $st = "Обрабатывается";
+        }
+
+        echo trim($date_create[$i]) . ' ' . trim($good[$i]) .' - ' . $st . '<br/>';
+    }
 
                     ?></td>
                 </tr>
+
     <?php   } ?>
     </table>
 </div>
