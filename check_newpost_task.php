@@ -27,11 +27,11 @@
         //'<tr><td class="tracking">Текущее местоположение</td>'.
         '<strong>Текущее местоположение:</strong>'.
         //'<td>(?<status>Отправление прибыло). Приглашаем получить по адресу: <a href="/map/warehouse/id/(?<warehouse>\d*?)" target="__blank">(?<address>.*?)</a>.*?Напоминаем, что через (?<days_keep>\d+?) рабочих дней от даты прибытия \((?<arrival_date>\d\d\.\d\d\.\d\d\d\d)\) будут начисляться дополнительные средства за хранение.</td></tr>'.
-        '(?<status>Отправление прибыло) в <a href="/office/view/id/(?<warehouse>\d*?)/.*"><span>(?<address>.*?)</span></a><p>Напоминаем, что через (?<days_keep>\d+?) рабочих дней от даты прибытия (?<arrival_date>\d\d\.\d\d\.\d\d\d\d) будут начисляться дополнительные средства за хранение.</p>'.
+        '(?<status>Отправление прибыло) в<a href="/office/view/id/(?<warehouse>\d.*)/"><span>(?<address>.*?)</span></a><p>Напоминаем, что через (?<days_keep>\d+?) рабочих дней от даты прибытия (?<arrival_date>\d\d\.\d\d\.\d\d\d\d) будут начисляться дополнительные средства за хранение.</p>'.
         //'<tr><td class="tracking">Обратная доставка</td><td>(?<status_back>Заказана услуга обратной доставки).</td></tr>'.
         '<p><strong>Обратная доставка:</strong>(?<status_back>Заказана услуга обратной доставки)</p>'.
         //'<tr><td class="tracking">Информация о оплате</td>.*?Сумма .*? - (?<cash_amount>.*?)</td>~';
-        '<p><strong>Информация про оплату:</strong>.*Сумма .* - (?<cash_amount>.*?)</p>~';
+        '<p><strong>.*ция про оплату:</strong>.*Сумма .* - (?<cash_amount>.*?)</p>~';
 
     $cargo_arrive_template =
         //'~<td class="tracking">Маршрут груза</td><td>(?<direct>.*?)</td></tr>'.
@@ -39,7 +39,7 @@
         //'<tr><td class="tracking">Текущее местоположение</td>'.
         '<strong>Текущее местоположение:</strong>'.
         //'<td>(?<status>Отправление прибыло). Приглашаем получить по адресу: <a href="/map/warehouse/id/(?<warehouse>\d*?)" target="__blank">(?<address>.*?)</a>.*?Напоминаем, что через (?<days_keep>\d+?) рабочих дней от даты прибытия \((?<arrival_date>\d\d\.\d\d\.\d\d\d\d)\) будут начисляться дополнительные средства за хранение.</td>~';
-        '(?<status>Отправление прибыло) в <a href="/office/view/id/(?<warehouse>\d*?)/.*"><span>(?<address>.*?)</span></a><p>Напоминаем, что через (?<days_keep>\d+?) рабочих дней от даты прибытия (?<arrival_date>\d\d\.\d\d\.\d\d\d\d) будут начисляться дополнительные средства за хранение.</p>~';
+        '(?<status>Отправление прибыло) в<a href="/office/view/id/(?<warehouse>\d.*)/"><span>(?<address>.*?)</span></a><p>Напоминаем, что через (?<days_keep>\d+?) рабочих дней от даты прибытия (?<arrival_date>\d\d\.\d\d\.\d\d\d\d) будут начисляться дополнительные средства за хранение.</p>~';
 
     $cargo_received_backshipment_template =
         //'~<td class="tracking">Маршрут груза</td><td>(?<direct>.*?)</td></tr>'.
@@ -63,7 +63,7 @@
         //'~<td>(?<status>Получатель отказался от получения отправления)'.
         '~</strong>(?<status>Получатель отказался от получения отправления).'.
         //'.*<form.*?id="(?<id_back>.*?)">~';
-        '.*<a href="/tracking/\?cargo_number=(?<id_back>.*?)">~';
+        '.*<a href="/tracking/?cargo_number=(?<id_back>.*?)">~';
 
     $cargo_reject_template =
         //'~<td>(?<status>Получатель отказался от получения отправления)~';
@@ -72,13 +72,12 @@
     $cargo_payed_transfer_template =
         //'~<td class="tracking">Маршрут груза</td><td>(?<direct>.*?)</td></tr>'.
         '~<div class="highlight"><p><strong>Маршрут:</strong>(?<direct>.*)</p>'.
-
         //'<tr><td class="tracking">Дата прибытия</td>'.
         '<p><strong>Дата прибытия:.*</strong>'.
         //'<td>(?<transfer_date>\d\d\.\d\d\.\d\d\d\d).*Информация о оплате</td>'.
         '.*(?<transfer_date>\d\d\.\d\d\.\d\d\d\d).*<p>.*<strong>Информация про оплату:</strong>' .
         //'<td>(?<status_back>Денежный перевод отправлено)</td>~';
-        '.*(Денежный перевод выдан)~';
+        '.*(Денежный перевод отправлено)~';
 
     $cargo_resend_template =
         //'~<td class="tracking">Маршрут груза</td><td>(?<direct>.*?)</td></tr>'.
@@ -88,7 +87,7 @@
         //'<td>(?<status>Отправление переадресовано)'.
         '.*(?<status>Отправление переадресовано)'.
         //'.*?<form.*?id="(?<id_new>.*?)">~';
-        '.*<a href="/tracking/\?cargo_number=(?<id_back>.*?)">~';
+        '.*<a href="/tracking/?cargo_number=(?<id_back>.*?)">~';
 
     $cargo_removed_template =
         '~(?<status>Прекращено хранение отправления)~';
@@ -100,7 +99,7 @@
         //'<td>(?<arrival_date>\d\d.\d\d.\d\d\d\d?)</td>.*'.
         //'<td class="tracking">Адрес доставки</td>.*?(?<address>[Отделение|Заказано].*?)<~';
         '<p><strong>(?<status>Ориентировочная дата доставки):</strong> (?<arrival_date>\d\d.\d\d.\d\d\d\d?)</p>'.
-        '<p><strong>(Адрес доставки:</strong><a href="/office/view/id/)?(?<warehouse>\d*?)?(/"><span>)(?<address>[Отделение|Заказано].*?)</span></a></p>~';
+        '<p><strong>Адрес доставки:</strong><a href="/office/view/id/?(?<warehouse>\d.*?)?(/"><span>)(?<address>[Отделение|Заказано].*?)</span></a></p>~';
 
     $cargo_end_free_template =
         '~Закончился бесплатный срок хранения груза~';
