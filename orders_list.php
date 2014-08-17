@@ -702,7 +702,7 @@
 											<label>Декларация Н.П.: <a target="_new" href="http://novaposhta.ua/tracking/?cargo_number=<?php echo $ord['newpost_id'] ?>&language=ru?cargo_number=<?php echo $ord['newpost_id'] ?>&language=ru"><?php echo $ord['newpost_id'] ?></a></label>
 										</div>
 										<div class="form-group">
-											<label>Обратная декларация: <a target="_new" href="http://novaposhta.ua/tracking/?cargo_number=<?php echo $ord['newpost_id'] ?>&language=ru?cargo_number=<?php echo $ord['newpost_backorder'] ?>&language=ru"><?php echo $ord['newpost_backorder'] ?></a></label>
+											<label>Обратная декларация: <a target="_new" href="http://novaposhta.ua/tracking/?cargo_number=<?php echo $ord['newpost_backorder'] ?>&language=ru"><?php echo $ord['newpost_backorder'] ?></a></label>
 										</div>
 									</div>
 									<div class="modal-footer">
@@ -827,7 +827,7 @@
 					<td <?php echo $ord['newpost_last_update'] ? 'title="обновлено:'.$ord['newpost_last_update'].'"': ''?>><a target="_new" href="http://novaposhta.ua/tracking/?cargo_number=<?php echo $ord['newpost_id'] ?>&language=ru"><?php echo $ord['newpost_id'] ?></a><br/><?php echo ($np_answer['msg'] == '' ? ($ord['newpost_id'] ? '<i>обрабатывается</i>' : '') : $np_answer['msg']) ?>
 					<?php if($ord['newpost_api'] and $np_answer['msg'] == 'Оформлена декларация') { ?><br><a target="_blank" href="http://orders.novaposhta.ua/pformn.php?o=<?php echo $ord['newpost_id']."&num_copy=4&token=".$ord['newpost_api'];?>">распечатать</a><?php } ?>
 					</td>
-					<td <?php echo $ord['newpost_last_backorder_update'] ? 'title="обновлено:'.$ord['newpost_last_backorder_update'].'"': ''?>><a target="_new" href="http://novaposhta.ua/tracking/?cargo_number=<?php echo $ord['newpost_id'] ?>&language=ru?cargo_number=<?php echo $ord['newpost_backorder'] ?>&language=ru"><?php echo $ord['newpost_backorder'] ?></a><br/><?php echo ($npb_answer['msg'] == '' ? ($ord['newpost_backorder'] ? '<i>обрабатывается</i>' : '') : $npb_answer['msg']) ?></td>
+					<td <?php echo $ord['newpost_last_backorder_update'] ? 'title="обновлено:'.$ord['newpost_last_backorder_update'].'"': ''?>><a target="_new" href="http://novaposhta.ua/tracking/?cargo_number=<?php echo $ord['newpost_backorder'] ?>&language=ru"><?php echo $ord['newpost_backorder'] ?></a><br/><?php echo ($npb_answer['msg'] == '' ? ($ord['newpost_backorder'] ? '<i>обрабатывается</i>' : '') : $npb_answer['msg']) ?></td>
 				</tr>
 	<?php
 			if ($ord['editor_ord'] == 1 && $_SESSION['user']['group_id'] != 2) {

@@ -49,7 +49,7 @@
         //'<td>(?<status>Отправление получено) (?<received_date>\d\d\.\d\d\.\d\d\d\d)( по адресу: <a href="/map/warehouse/id/)?(?<warehouse>\d*?)?(" target="__blank">)?(?<address>.*?)?(</a></td>)?'.
         '(?<status>Отправление получено).*(?<received_date>\d\d\.\d\d\.\d\d\d\d).*(по адресу<a href="/office/view/id/)(?<warehouse>\d*).*(/"><span>)(?<address>.*)?(</span></a>)' .
         //'.*?<td>(?<status_back>Обратную доставку отправлено).*?<form.*?id="(?<id_back>.*?)"~';
-        '<p><strong>Обратная доставка:</strong>(?<status_back>Обратная доставка отправлена)</p><a href="/tracking/\?cargo_number=(?<id_back>.*)">~';
+        '<p><strong>Обратная доставка:</strong>(?<status_back>Обратная доставка отправлена)</p><a href="/tracking/\?cargo_number=(?<id_back>.*)">Просмотреть движение груза~';
 
     $cargo_received_template =
         //'~<td class="tracking">Маршрут груза</td><td>(?<direct>.*?)</td></tr>'.
@@ -63,7 +63,7 @@
         //'~<td>(?<status>Получатель отказался от получения отправления)'.
         '~</strong>(?<status>Получатель отказался от получения отправления).'.
         //'.*<form.*?id="(?<id_back>.*?)">~';
-        '.*<a href="/tracking/?cargo_number=(?<id_back>.*?)">~';
+        '.*<a href="/tracking/?cargo_number=(?<id_back>.*?)">Просмотреть движение груза~';
 
     $cargo_reject_template =
         //'~<td>(?<status>Получатель отказался от получения отправления)~';
@@ -87,7 +87,7 @@
         //'<td>(?<status>Отправление переадресовано)'.
         '.*(?<status>Отправление переадресовано)'.
         //'.*?<form.*?id="(?<id_new>.*?)">~';
-        '.*<a href="/tracking/?cargo_number=(?<id_back>.*?)">~';
+        '.*<a href="/tracking/?cargo_number=(?<id_back>.*?)">Просмотреть движение груза~';
 
     $cargo_removed_template =
         '~(?<status>Прекращено хранение отправления)~';
