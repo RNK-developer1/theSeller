@@ -109,8 +109,8 @@ echo $myXML;
 			orders.status_step2 as status_step2
 		   FROM orders, users as owner
 			WHERE
-				-- HOUR(NOW()) >= 9 AND
-				-- HOUR(NOW()) <= 18 AND
+				HOUR(NOW()) >= 9 AND
+				HOUR(NOW()) <= 18 AND
 				orders.status_step1 > 50 AND
 				orders.status_step2 IN (202, 208, 200, 204, 205, 206, 250) AND
 				orders.status_step3 = 0 AND
