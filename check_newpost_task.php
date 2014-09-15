@@ -158,6 +158,24 @@
                     }
                 }
 
+
+                // Поиск в ссылках
+                $highlight_a = $highlight->find('a');
+                foreach($highlight_a as $a) {
+                    $href = $a->href;
+                    if (preg_match('/\/office\/view\/id\//', $href)) {
+                        $warehouse = substr($href,
+                            strlen('/office/view/id/'));
+                        $results['warehouse'] = $warehouse;
+                        $results['address'] = $a->innertext;
+                    }
+                    if (preg_match('/\/tracking\/\?cargo_number=/', $href)) {
+                        $id_back = substr($href,
+                            strlen('/tracking/?cargo_number='));
+                        $results['id_back'] = $id_back;
+                    }
+                }
+
                 // Поиск в текстах
                 $highlight_text = $highlight->find('text');
                 foreach($highlight_text as $text) {
@@ -188,44 +206,39 @@
                         }
                     }
 
+                    if (preg_match('/Получатель отказался от получения отправления/', $text)) {
+                        $results['status'] = 'Получатель отказался от получения отправления';
+                        if ($results['id_back']) {
+                            $status_array['cargo_reject_return']['status_flag'] = true;
+                        } else {
+                            $status_array['cargo_reject']['status_flag'] = true;
+                        }
+                    }
+
                     if (preg_match('/Напоминаем, что через\s(\d+)\sрабочих дней от даты прибытия\s(\d\d\.\d\d\.\d\d\d\d)\sбудут начисляться дополнительные средства за хранение/', $text, $data)) {
                         $results['days_keep'] = $data[1];
                         $results['arrival_date'] = $data[2];
-                    }
-                }
-
-                // Поиск в ссылках
-                $highlight_a = $highlight->find('a');
-                foreach($highlight_a as $a) {
-                    $href = $a->href;
-                    if (preg_match('/\/office\/view\/id\//', $href)) {
-                        $warehouse = substr($href,
-                            strlen('/office/view/id/'));
-                        $results['warehouse'] = $warehouse;
-                        $results['address'] = $a->innertext;
-                    }
-                    if (preg_match('/\/tracking\/\?cargo_number=/', $href)) {
-                        $id_back = substr($href,
-                            strlen('/tracking/?cargo_number='));
-                        $results['id_back'] = $id_back;
                     }
                 }
             }
         }
 
         foreach ($results as $key=>$value) {
-            if ($value = 'Денежный перевод отправлено') {
+            if ($value == 'Денежный перевод отправлено') {
                 $results['status_back'] = 'Денежный перевод отправлено';
                 $status_array['cargo_payed_transfer']['status_flag'] = true;
             }
-            if ($value = 'Ориентировочная дата доставки') {
+            if ($value == 'Денежный перевод выдан') {
+                $results['status_back'] = 'Денежный перевод выдан';
+                $status_array['cargo_payed_transfer']['status_flag'] = true;
+            }
+            if (!empty($results['arrival'])) {
                 $results['status'] = 'Ориентировочная дата доставки';
-                if (!empty($results['arrival']))
-                    $results['arrival_date'] = $results['arrival'];
+                $results['arrival_date'] = $results['arrival'];
                 $status_array['cargo_ontheway']['status_flag'] = true;
             }
-        }
 
+        }
         return $html_src;
     }
 
@@ -471,8 +484,12 @@
                                     $matches['from_status2'] = array(200,250,202,204,205,221,224);
                                     $matches['from_status3'] = array(301,302);
                                 } else {
-                                    preg_match($cargo_reject_return_template,$np_reply,$matches);
-                                    if(!empty($matches)) {
+                                    //preg_match($cargo_reject_return_template,$np_reply,$matches);
+                                    if($status_array['cargo_reject_return']['status_flag']) {
+
+                                        $matches['status'] = $results['status'];
+                                        $matches['id_back'] = $results['id_back'];
+
                                         $matches['activity']="Клиент отказался от груза - возврат";
                                         $matches['msg']='Возврат!';
                                         $matches['status_step2'] = 221;
@@ -480,8 +497,11 @@
                                         $matches['from_status2'] = array(200,250,202,204,206,208,210,222,220);
                                         $matches['from_status3'] = array(301, 302);
                                     } else {
-                                        preg_match($cargo_reject_template,$np_reply,$matches);
-                                        if(!empty($matches)) {
+                                        //preg_match($cargo_reject_template,$np_reply,$matches);
+                                        if($status_array['cargo_reject']['status_flag']) {
+
+                                            $matches['status'] = $results['status'];
+
                                             $matches['activity']="Клиент отказался от груза - подать заявление";
                                             $matches['msg']='Отказ!';
                                             $matches['status_step2'] = 225;
@@ -689,8 +709,18 @@
                     $matches['activity']=($order['status_step3']=='301' or $order['status_step3']=='310' or $order['status_step3']=='311' or $order['status_step3']=='312') ? 'Деньги в пути':'Возврат в пути';
                     $matches['msg']=(($order['status_step3']=='301' or $order['status_step3']=='310' or $order['status_step3']=='311' or $order['status_step3']=='312') ? 'Деньги прибудут':'Возврат прибудет').':<br/>'.$matches['arrival_date'];
                 } else {
-                    $matches['msg']='Ошибка!';
-                    echo 'Ошибка! newpost_backorder: ' . $order['newpost_backorder'] . ' order_id:' .  $order['id'] . '<br>' ; //print_r($order);
+                    preg_match($cargo_end_template,$np_reply,$matches);
+                    if (!empty($matches)) {
+                        echo $matches['msg']='Ваш груз поставлен на удаление';
+                    } else {
+                        preg_match($cargo_end_template2,$np_reply,$matches);
+                        if (!empty($matches)) {
+                            echo $matches['msg']='Истек срок хранения отправления';
+                        } else {
+                        echo $matches['msg']='Ошибка!';
+                        }
+                    }
+                    echo ' newpost_backorder: ' . $order['newpost_backorder'] . ' order_id:' .  $order['id'] . '<br>'; //print_r($order);
                     echo $html_src;
                 }
             }
